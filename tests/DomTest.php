@@ -31,8 +31,6 @@ final class DomTest extends TestCase
             ->containsIn('ul li', 'list 2')
             ->containsIn('ul li', 'list 3')
             ->doesNotContainIn('ul li', 'list 5')
-            ->elementIsVisible('ul li')
-            ->elementIsNotVisible('#foobar')
             ->hasElement('ul li')
             ->doesNotHaveElement('#foobar')
             ->hasElementCount('ul li', 3)

@@ -12,7 +12,6 @@
 namespace Zenstruck\Dom;
 
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Attributes;
 use Zenstruck\Dom\Node\Form;
@@ -25,6 +24,8 @@ use Zenstruck\Dom\Node\Form;
 class Node
 {
     public const SELECTOR = '*';
+
+    private Attributes $attributes;
 
     private function __construct(private Crawler $crawler)
     {
@@ -57,17 +58,6 @@ class Node
         return $this->crawler;
     }
 
-    final public function element(): \DOMElement
-    {
-        $element = $this->normalizedCrawler()->getNode(0);
-
-        if (!$element instanceof \DOMElement) {
-            throw new RuntimeException('Unable to get attributes from non-element node.');
-        }
-
-        return $element;
-    }
-
     final public function tag(): string
     {
         return $this->crawler->nodeName();
@@ -75,7 +65,17 @@ class Node
 
     final public function attributes(): Attributes
     {
-        return new Attributes($this->element());
+        if (isset($this->attributes)) {
+            return $this->attributes;
+        }
+
+        $element = $this->crawler->getNode(0);
+
+        if (!$element instanceof \DOMElement) {
+            throw new RuntimeException('Unable to get attributes from node.');
+        }
+
+        return $this->attributes = new Attributes($element);
     }
 
     final public function text(): string
@@ -90,10 +90,6 @@ class Node
 
     final public function html(): ?string
     {
-        if ($this->crawler instanceof PantherCrawler) {
-            return $this->crawler->html();
-        }
-
         if ('' === $html = $this->crawler->outerHtml()) {
             return null;
         }
@@ -214,15 +210,6 @@ class Node
         return $this;
     }
 
-    final public function isVisible(): bool
-    {
-        if ($this->crawler instanceof PantherCrawler) {
-            return $this->crawler->isDisplayed();
-        }
-
-        return true;
-    }
-
     final public function dd(): void
     {
         $this->dump();
@@ -238,14 +225,5 @@ class Node
         $nodes = Nodes::create($crawler);
 
         return $selector ? $nodes->filter($selector) : $nodes;
-    }
-
-    private function normalizedCrawler(): Crawler
-    {
-        if ($this->crawler instanceof PantherCrawler) {
-            return (new Crawler($this->crawler->html()))->filter($this->tag());
-        }
-
-        return $this->crawler;
     }
 }

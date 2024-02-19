@@ -28,7 +28,6 @@ final class Radio extends Field
     public function selected(): ?self
     {
         foreach ($this->collection() as $radio) {
-            // hack for panther
             $radio = $radio->ensure(self::class);
 
             if ($radio->isSelected()) {
