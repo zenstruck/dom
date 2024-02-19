@@ -1,0 +1,39 @@
+{
+    "name": "zenstruck/dom",
+    "description": "DOM crawler with advanced selector API and assertions.",
+    "homepage": "https://github.com/zenstruck/dom",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [],
+    "authors": [
+        {
+            "name": "Kevin Bond",
+            "email": "kevinbond@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "symfony/css-selector": "^5.4|^6.4|^7.0",
+        "symfony/dom-crawler": "^5.4|^6.4|^7.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.4",
+        "phpunit/phpunit": "^9.6.0",
+        "symfony/panther": "^2.1",
+        "symfony/phpunit-bridge": "^6.1|^7.0",
+        "symfony/var-dumper": "^5.4|^6.0|^7.0",
+        "zenstruck/assert": "^1.5"
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": { "Zenstruck\\": ["src/"] }
+    },
+    "autoload-dev": {
+        "psr-4": { "Zenstruck\\Dom\\Tests\\": ["tests/"] }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
