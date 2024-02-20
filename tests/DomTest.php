@@ -34,6 +34,8 @@ class DomTest extends TestCase
             ->hasElement('ul li')
             ->doesNotHaveElement('#foobar')
             ->hasElementCount('ul li', 3)
+            ->elementIsVisible('#link')
+            ->elementIsNotVisible('#foobar')
             ->attributeContains('meta[name="description"]', 'content', 'meta description')
             ->attributeContains('a', 'href', '/page2')
             ->attributeContains('a', 'href', '/exception')

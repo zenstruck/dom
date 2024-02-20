@@ -93,6 +93,32 @@ trait Assertions
     /**
      * @param SelectorType $selector
      */
+    public function elementIsVisible(Selector|string|callable $selector): static
+    {
+        Assert::true($this->node($selector)->isVisible(), 'Element with selector "{selector}" is not visible.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function elementIsNotVisible(Selector|string|callable $selector): static
+    {
+        if (!$node = $this->dom()->find($selector)) {
+            Assert::pass();
+
+            return $this;
+        }
+
+        Assert::false($node->isVisible(), 'Element with selector "{selector}" is visible but it should not be.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
     public function attributeContains(Selector|string|callable $selector, string $attribute, string $expected): static
     {
         $attributes = \implode(' ', $this->dom()->findAll($selector)->map(fn(Node $n) => $n->attributes()->get($attribute)));

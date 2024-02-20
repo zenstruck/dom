@@ -64,6 +64,15 @@ class Node
         return $this->crawler->nodeName();
     }
 
+    final public function isVisible(): bool
+    {
+        if ($this->crawler instanceof PantherCrawler) {
+            return $this->crawler->isDisplayed();
+        }
+
+        return true;
+    }
+
     final public function element(): \DOMElement
     {
         $element = $this->normalizedCrawler()->getNode(0);
