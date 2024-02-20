@@ -13,7 +13,6 @@ namespace Zenstruck;
 
 use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom\Assertion;
-use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Nodes;
 use Zenstruck\Dom\Selector;
@@ -43,16 +42,6 @@ final class Dom
     public function find(Selector|string|callable $selector): ?Node
     {
         return Nodes::create($this->crawler)->first($selector);
-    }
-
-    /**
-     * @param SelectorType $selector
-     *
-     * @throws RuntimeException If the node is not found
-     */
-    public function findOrFail(Selector|string|callable $selector): Node
-    {
-        return $this->find($selector) ?? throw new RuntimeException(\sprintf('Could not find node with selector "%s".', Selector::wrap($selector)));
     }
 
     /**
