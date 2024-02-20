@@ -12,6 +12,7 @@
 namespace Zenstruck\Dom;
 
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Attributes;
 use Zenstruck\Dom\Node\Form;
@@ -69,7 +70,7 @@ class Node
             return $this->attributes;
         }
 
-        $element = $this->crawler->getNode(0);
+        $element = $this->normalizedCrawler()->getNode(0);
 
         if (!$element instanceof \DOMElement) {
             throw new RuntimeException('Unable to get attributes from node.');
@@ -80,17 +81,17 @@ class Node
 
     final public function text(): string
     {
-        return $this->crawler->text();
+        return $this->normalizedCrawler()->text();
     }
 
     final public function directText(): string
     {
-        return $this->crawler->innerText();
+        return $this->normalizedCrawler()->innerText();
     }
 
     final public function html(): ?string
     {
-        if ('' === $html = $this->crawler->outerHtml()) {
+        if ('' === $html = $this->normalizedCrawler()->outerHtml()) {
             return null;
         }
 
@@ -99,7 +100,7 @@ class Node
 
     final public function innerHtml(): string
     {
-        return $this->crawler->html();
+        return $this->normalizedCrawler()->html();
     }
 
     final public function parent(): ?self
@@ -225,5 +226,24 @@ class Node
         $nodes = Nodes::create($crawler);
 
         return $selector ? $nodes->filter($selector) : $nodes;
+    }
+
+    private function normalizedCrawler(): Crawler
+    {
+        if (!$this->crawler instanceof PantherCrawler) {
+            return $this->crawler;
+        }
+
+        if (!$element = $this->crawler->getElement(0)) {
+            throw new RuntimeException('Unable to get element from PantherCrawler.');
+        }
+
+        if (!\method_exists($element, 'getDomProperty')) {
+            throw new RuntimeException('Unable to get outerHTML from PantherCrawler.');
+        }
+
+        $html = $element->getDomProperty('outerHTML') ?? throw new RuntimeException('Unable to get outerHTML from PantherCrawler.');
+
+        return (new Crawler($html))->filter($this->tag());
     }
 }

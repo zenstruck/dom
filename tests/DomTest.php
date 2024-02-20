@@ -17,7 +17,7 @@ use Zenstruck\Dom;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class DomTest extends TestCase
+class DomTest extends TestCase
 {
     /**
      * @test
@@ -68,7 +68,7 @@ final class DomTest extends TestCase
         ;
     }
 
-    private function dom(): Dom
+    protected function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/Fixtures/page.html'));
     }
