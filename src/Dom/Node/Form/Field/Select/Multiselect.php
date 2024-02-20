@@ -37,6 +37,14 @@ final class Multiselect extends Select
     /**
      * @return string[]
      */
+    public function selectedTexts(): array
+    {
+        return \array_filter($this->selectedOptions()->map(fn(Option $option) => $option->text()));
+    }
+
+    /**
+     * @return string[]
+     */
     public function value(): array
     {
         return $this->selectedValues();

@@ -170,14 +170,26 @@ trait Assertions
                 break;
 
             case Multiselect::class:
-                Assert::that($field->selectedValues())
+                if (\in_array($expected, $field->selectedValues(), true)) {
+                    Assert::pass();
+
+                    break;
+                }
+
+                Assert::that($field->selectedTexts())
                     ->contains($expected, 'Multiselect with selector "{selector}" does not have "{needle}" selected.', ['selector' => $selector])
                 ;
 
                 break;
 
             case Combobox::class:
-                Assert::that($field->selectedValue())
+                if ($expected == $field->selectedValue()) {
+                    Assert::pass();
+
+                    break;
+                }
+
+                Assert::that($field->selectedText())
                     ->is($expected, 'Combobox with selector "{selector}" has "{actual}" selected but expected "{expected}".', ['selector' => $selector])
                 ;
 
@@ -281,7 +293,7 @@ trait Assertions
     private function node(Selector|string|callable $selector, string $type = Node::class): Node
     {
         if (!$node = $this->dom()->find($selector)) {
-            Assert::fail('Could not find node with selector "{selector}".', ['selector' => $selector]);
+            Assert::fail('Could not find node with selector "{selector}".', ['selector' => (string) Selector::wrap($selector)]);
         }
 
         return Assert::try(static fn() => $node->ensure($type));

@@ -13,6 +13,7 @@ namespace Zenstruck\Dom\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
+use Zenstruck\Dom\Exception\RuntimeException;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -42,13 +43,16 @@ class DomTest extends TestCase
             ->fieldEquals('input1', 'input 1') // id
             ->fieldEquals('input_1', 'input 1') // name
             ->fieldEquals('Input 4', 'option 1') // combobox
+            ->fieldEquals('Input 10', 'Some value') // combobox (text value)
             ->fieldDoesNotEqual('Input 1', 'input 2') // label
             ->fieldDoesNotEqual('input1', 'input 2') // id
             ->fieldDoesNotEqual('input_1', 'input 2') // name
             ->fieldSelected('Input 4', 'option 1') // combobox
             ->fieldNotSelected('Input 4', 'option 2') // combobox
+            ->fieldSelected('Input 10', 'Some value') // combobox (text value)
             ->fieldSelected('Input 7', 'option 3') // multiselect
             ->fieldNotSelected('Input 7', 'option 2') // multiselect
+            ->fieldSelected('Input 6', 'Another Option') // multiselect (text value)
             ->fieldSelected('input_8', 'option 2') // radio
             ->fieldNotSelected('input_8', 'option 1') // radio
             ->fieldChecked('input_3') // checkbox
@@ -66,6 +70,33 @@ class DomTest extends TestCase
         $this->dom()->assert()
             ->containsIn(fn(Dom $dom) => $dom->findAll('ul li')->last(), 'list 3')
         ;
+    }
+
+    /**
+     * @test
+     */
+    public function node_data(): void
+    {
+        $dom = $this->dom();
+
+        $this->assertSame('a link. not a link', $dom->find('#link')->text());
+        $this->assertSame('not a link', $dom->find('#link')->directText());
+        $this->assertSame('<a href="/page2" title="click here">a link.</a> not a link', $dom->find('#link')->innerHtml());
+        $this->assertSame('<p id="link"><a href="/page2" title="click here">a link.</a> not a link</p>', $dom->find('#link')->outerHtml());
+    }
+
+    /**
+     * @test
+     */
+    public function find_or_fail(): void
+    {
+        $dom = $this->dom();
+
+        $dom->findOrFail('#link');
+
+        $this->expectException(RuntimeException::class);
+
+        $dom->findOrFail('#foobar');
     }
 
     protected function dom(): Dom
