@@ -129,6 +129,8 @@ final class Assertion
      */
     public function attributeContains(Selector|string|callable $selector, string $attribute, string $expected): static
     {
+        $this->hasElement($selector);
+
         $attributes = \implode(' ', $this->dom->findAll($selector)->map(fn(Node $n) => $n->attributes()->get($attribute)));
 
         Assert::that($attributes)

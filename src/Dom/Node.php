@@ -87,7 +87,11 @@ class Node
 
     final public function text(): string
     {
-        return $this->normalizedCrawler()->text();
+        if ($this->crawler instanceof PantherCrawler && 'title' === $this->tag()) {
+            return $this->normalizedCrawler()->text();
+        }
+
+        return $this->crawler->text();
     }
 
     final public function directText(): string

@@ -40,6 +40,8 @@ class DomTest extends TestCase
             ->attributeContains('meta[name="description"]', 'content', 'meta description')
             ->attributeContains('a', 'href', '/page2')
             ->attributeContains('a', 'href', '/exception')
+            ->attributeContains('html', 'lang', 'en')
+            ->attributeContains('body', 'class', 'body-class')
             ->attributeDoesNotContain('a', 'href', '/page4')
             ->fieldEquals('Input 1', 'input 1') // label
             ->fieldEquals('input1', 'input 1') // id
