@@ -13,6 +13,7 @@ namespace Zenstruck\Dom\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
+use Zenstruck\Dom\Exception\RuntimeException;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -84,6 +85,20 @@ class DomTest extends TestCase
         $this->assertSame('not a link', $dom->find('#link')->directText());
         $this->assertSame('<a href="/page2" title="click here">a link.</a> not a link', $dom->find('#link')->innerHtml());
         $this->assertSame('<p id="link"><a href="/page2" title="click here">a link.</a> not a link</p>', $dom->find('#link')->outerHtml());
+    }
+
+    /**
+     * @test
+     */
+    public function find_or_fail(): void
+    {
+        $dom = $this->dom();
+
+        $dom->findOrFail('#link');
+
+        $this->expectException(RuntimeException::class);
+
+        $dom->findOrFail('#foobar');
     }
 
     protected function dom(): Dom
