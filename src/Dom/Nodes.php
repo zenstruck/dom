@@ -22,13 +22,13 @@ use Symfony\Component\DomCrawler\Crawler;
  */
 final class Nodes implements \IteratorAggregate, \Countable
 {
-    private function __construct(private Crawler $crawler)
+    private function __construct(private Crawler $crawler, private ?Session $session)
     {
     }
 
-    public static function create(Crawler $crawler): self
+    public static function create(Crawler $crawler, ?Session $session): self
     {
-        return new self($crawler);
+        return new self($crawler, $session);
     }
 
     public function crawler(): Crawler
@@ -45,12 +45,12 @@ final class Nodes implements \IteratorAggregate, \Countable
             return $this->filter($selector)->first();
         }
 
-        return $this->count() ? Node::create($this->crawler->first()) : null;
+        return $this->count() ? Node::create($this->crawler->first(), $this->session) : null;
     }
 
     public function last(): ?Node
     {
-        return $this->count() ? Node::create($this->crawler->last()) : null;
+        return $this->count() ? Node::create($this->crawler->last(), $this->session) : null;
     }
 
     /**
@@ -58,7 +58,7 @@ final class Nodes implements \IteratorAggregate, \Countable
      */
     public function filter(Selector|string|callable $selector): self
     {
-        return self::create(Selector::wrap($selector)->filter($this->crawler));
+        return self::create(Selector::wrap($selector)->filter($this->crawler), $this->session);
     }
 
     /**
@@ -95,7 +95,7 @@ final class Nodes implements \IteratorAggregate, \Countable
     public function getIterator(): \Traversable
     {
         for ($i = 0; $i < $this->count(); ++$i) {
-            yield Node::create($this->crawler->eq($i));
+            yield Node::create($this->crawler->eq($i), $this->session);
         }
     }
 

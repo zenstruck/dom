@@ -24,4 +24,9 @@ final class Textarea extends Field
     {
         return $this->directText();
     }
+
+    public function fill(string $value): void
+    {
+        $this->ensureSession()->fill($this, $value);
+    }
 }

@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom\Node\Form\Field\Select;
 
+use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Form\Field\Select;
 use Zenstruck\Dom\Nodes;
 
@@ -48,5 +49,26 @@ final class Multiselect extends Select
     public function value(): array
     {
         return $this->selectedValues();
+    }
+
+    /**
+     * @param string[] $values
+     */
+    public function select(array $values): void
+    {
+        foreach ($values as $value) {
+            if ($option = $this->optionMatching($value)) {
+                $option->select();
+
+                continue;
+            }
+
+            throw new RuntimeException(\sprintf('Could not find option with value/text "%s".', $value));
+        }
+    }
+
+    public function deselectAll(): void
+    {
+        $this->ensureSession()->unselect($this);
     }
 }

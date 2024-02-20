@@ -32,4 +32,14 @@ final class Checkbox extends Field
     {
         return $this->isChecked() ? 'on' : null;
     }
+
+    public function check(): void
+    {
+        $this->ensureSession()->select($this);
+    }
+
+    public function uncheck(): void
+    {
+        $this->ensureSession()->unselect($this);
+    }
 }

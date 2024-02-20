@@ -16,6 +16,7 @@ use Zenstruck\Dom\Assertion;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Nodes;
 use Zenstruck\Dom\Selector;
+use Zenstruck\Dom\Session;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -27,7 +28,7 @@ final class Dom
     private Crawler $crawler;
     private Assertion $assertion;
 
-    public function __construct(string|Crawler $crawler)
+    public function __construct(string|Crawler $crawler, private ?Session $session = null)
     {
         if (\is_string($crawler)) {
             $crawler = new Crawler($crawler);
@@ -41,7 +42,7 @@ final class Dom
      */
     public function find(Selector|string|callable $selector): ?Node
     {
-        return Nodes::create($this->crawler)->first($selector);
+        return Nodes::create($this->crawler, $this->session)->first($selector);
     }
 
     /**
@@ -49,7 +50,7 @@ final class Dom
      */
     public function findAll(Selector|string|callable $selector): Nodes
     {
-        return Nodes::create($this->crawler)->filter($selector);
+        return Nodes::create($this->crawler, $this->session)->filter($selector);
     }
 
     public function crawler(): Crawler

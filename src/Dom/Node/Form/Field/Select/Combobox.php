@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom\Node\Form\Field\Select;
 
+use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Form\Field\Select;
 
 /**
@@ -46,5 +47,14 @@ final class Combobox extends Select
     public function value(): ?string
     {
         return $this->selectedValue();
+    }
+
+    public function select(string $value): void
+    {
+        if (!$option = $this->optionMatching($value)) {
+            throw new RuntimeException(\sprintf('Could not find option with value/text "%s".', $value));
+        }
+
+        $option->select();
     }
 }

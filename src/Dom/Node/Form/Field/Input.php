@@ -29,4 +29,9 @@ final class Input extends Field
     {
         return parent::value();
     }
+
+    public function fill(string $value): void
+    {
+        $this->ensureSession()->fill($this, $value);
+    }
 }

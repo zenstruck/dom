@@ -28,28 +28,28 @@ class Node
 
     private Attributes $attributes;
 
-    private function __construct(private Crawler $crawler)
+    private function __construct(private Crawler $crawler, protected readonly ?Session $session)
     {
     }
 
-    final public static function create(Crawler $crawler): self
+    final public static function create(Crawler $crawler, ?Session $session): self
     {
-        $node = new self($crawler);
+        $node = new self($crawler, $session);
         $tag = \mb_strtolower($node->tag());
 
         return match (true) {
-            'form' === $tag => new Form($crawler),
-            'label' === $tag => new Form\Label($crawler),
-            'textarea' === $tag => new Form\Field\Textarea($crawler),
-            'input' === $tag && $node->attributes()->is('type', 'checkbox') => new Form\Field\Checkbox($crawler),
-            'input' === $tag && $node->attributes()->is('type', 'radio') => new Form\Field\Radio($crawler),
-            'input' === $tag && $node->attributes()->is('type', 'file') => new Form\Field\File($crawler),
-            'input' === $tag && $node->attributes()->is('type', 'submit', 'button', 'reset', 'image') => new Form\Button($crawler),
-            'button' === $tag => new Form\Button($crawler),
-            'input' === $tag => new Form\Field\Input($crawler),
-            'option' === $tag => new Form\Field\Select\Option($crawler),
-            'select' === $tag && $node->attributes()->has('multiple') => new Form\Field\Select\Multiselect($crawler),
-            'select' === $tag => new Form\Field\Select\Combobox($crawler),
+            'form' === $tag => new Form($crawler, $session),
+            'label' === $tag => new Form\Label($crawler, $session),
+            'textarea' === $tag => new Form\Field\Textarea($crawler, $session),
+            'input' === $tag && $node->attributes()->is('type', 'checkbox') => new Form\Field\Checkbox($crawler, $session),
+            'input' === $tag && $node->attributes()->is('type', 'radio') => new Form\Field\Radio($crawler, $session),
+            'input' === $tag && $node->attributes()->is('type', 'file') => new Form\Field\File($crawler, $session),
+            'input' === $tag && $node->attributes()->is('type', 'submit', 'button', 'reset', 'image') => new Form\Button($crawler, $session),
+            'button' === $tag => new Form\Button($crawler, $session),
+            'input' === $tag => new Form\Field\Input($crawler, $session),
+            'option' === $tag => new Form\Field\Select\Option($crawler, $session),
+            'select' === $tag && $node->attributes()->has('multiple') => new Form\Field\Select\Multiselect($crawler, $session),
+            'select' === $tag => new Form\Field\Select\Combobox($crawler, $session),
             default => $node,
         };
     }
@@ -109,24 +109,24 @@ class Node
 
     final public function parent(): ?self
     {
-        return Nodes::create($this->crawler->ancestors())->first();
+        return Nodes::create($this->crawler->ancestors(), $this->session)->first();
     }
 
     final public function next(): ?self
     {
-        return Nodes::create($this->crawler->nextAll())->first();
+        return Nodes::create($this->crawler->nextAll(), $this->session)->first();
     }
 
     public function previous(): ?self
     {
-        return Nodes::create($this->crawler->previousAll())->first();
+        return Nodes::create($this->crawler->previousAll(), $this->session)->first();
     }
 
     final public function closest(string $selector): ?self
     {
         $closest = $this->crawler->closest($selector);
 
-        return $closest ? self::create($closest) : null;
+        return $closest ? self::create($closest, $this->session) : null;
     }
 
     /**
@@ -208,6 +208,11 @@ class Node
         return $this->attributes()->get('id');
     }
 
+    final public function click(): void
+    {
+        $this->ensureSession()->click($this);
+    }
+
     final public function dump(): static
     {
         \function_exists('dump') ? dump($this->outerHtml()) : \var_dump($this->outerHtml());
@@ -222,12 +227,17 @@ class Node
         exit(1);
     }
 
+    final protected function ensureSession(): Session
+    {
+        return $this->session ?? throw new RuntimeException('No interactive session available.');
+    }
+
     /**
      * @param SelectorType|null $selector
      */
     private function applySelectorTo(Crawler $crawler, Selector|string|callable|null $selector = null): Nodes
     {
-        $nodes = Nodes::create($crawler);
+        $nodes = Nodes::create($crawler, $this->session);
 
         return $selector ? $nodes->filter($selector) : $nodes;
     }

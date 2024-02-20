@@ -35,11 +35,16 @@ final class Option extends Field
 
     public function collection(): Nodes
     {
-        return $this->selector()?->availableOptions() ?? Nodes::create(new Crawler());
+        return $this->selector()?->availableOptions() ?? Nodes::create(new Crawler(), $this->session);
     }
 
     public function selector(): ?Select
     {
         return $this->ancestor('select')?->ensure(Select::class);
+    }
+
+    public function select(): void
+    {
+        $this->ensureSession()->select($this);
     }
 }

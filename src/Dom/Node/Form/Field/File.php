@@ -24,4 +24,19 @@ final class File extends Field
     {
         return $this->attributes()->has('multiple');
     }
+
+    public function attach(string ...$filenames): void
+    {
+        if (\count($filenames) > 1 && !$this->isMultiple()) {
+            throw new \InvalidArgumentException('Cannot attach multiple files to a non-multiple file input.');
+        }
+
+        foreach ($filenames as $filename) {
+            if (!\file_exists($filename)) {
+                throw new \InvalidArgumentException(\sprintf('File "%s" does not exist.', $filename));
+            }
+        }
+
+        $this->ensureSession()->attach($this, $filenames);
+    }
 }
