@@ -3,5 +3,6 @@
 /vendor/
 /build/
 /var/
+/drivers/
 /.php-cs-fixer.cache
 /.phpunit.result.cache

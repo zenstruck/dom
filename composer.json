@@ -17,12 +17,16 @@
         "symfony/dom-crawler": "^6.4|^7.0"
     },
     "require-dev": {
+        "dbrekelmans/bdi": "^1.1",
         "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.6.0",
         "symfony/panther": "^2.1",
         "symfony/phpunit-bridge": "^6.1|^7.0",
         "symfony/var-dumper": "^5.4|^6.0|^7.0",
         "zenstruck/assert": "^1.5"
+    },
+    "conflict": {
+        "php-webdriver/webdriver": "<1.15.1"
     },
     "config": {
         "preferred-install": "dist",
