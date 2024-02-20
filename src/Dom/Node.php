@@ -64,19 +64,16 @@ class Node
         return $this->crawler->nodeName();
     }
 
-    final public function attributes(): Attributes
+    final public function element(): \DOMElement
     {
-        if (isset($this->attributes)) {
-            return $this->attributes;
-        }
-
         $element = $this->normalizedCrawler()->getNode(0);
 
-        if (!$element instanceof \DOMElement) {
-            throw new RuntimeException('Unable to get attributes from node.');
-        }
+        return $element instanceof \DOMElement ? $element : throw new RuntimeException('Unable to get DOMElement from node.');
+    }
 
-        return $this->attributes = new Attributes($element);
+    final public function attributes(): Attributes
+    {
+        return $this->attributes ??= new Attributes($this->element());
     }
 
     final public function text(): string
