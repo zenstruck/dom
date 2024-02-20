@@ -19,13 +19,16 @@ use Zenstruck\Dom;
  *
  * @group panther
  */
-final class PantherDomTest extends DomTest
+final class PantherFirefoxDomTest extends DomTest
 {
     use PantherTestCaseTrait;
 
     protected function dom(): Dom
     {
-        $client = self::createPantherClient(['webServerDir' => __DIR__.'/Fixtures']);
+        $client = self::createPantherClient([
+            'browser' => 'firefox',
+            'webServerDir' => __DIR__.'/Fixtures',
+        ]);
         $client->get('/page.html');
 
         return new Dom($client->getCrawler());
