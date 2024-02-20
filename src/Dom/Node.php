@@ -89,18 +89,16 @@ class Node
         return $this->normalizedCrawler()->innerText();
     }
 
-    final public function html(): ?string
+    final public function outerHtml(): string
     {
-        if ('' === $html = $this->normalizedCrawler()->outerHtml()) {
-            return null;
-        }
-
-        return $html;
+        return $this->normalizedCrawler()->outerHtml();
     }
 
-    final public function innerHtml(): string
+    final public function innerHtml(): ?string
     {
-        return $this->normalizedCrawler()->html();
+        $html = $this->normalizedCrawler()->html();
+
+        return '' === $html ? null : $html;
     }
 
     final public function parent(): ?self
@@ -206,7 +204,7 @@ class Node
 
     final public function dump(): static
     {
-        \function_exists('dump') ? dump($this->html()) : \var_dump($this->html());
+        \function_exists('dump') ? dump($this->outerHtml()) : \var_dump($this->outerHtml());
 
         return $this;
     }

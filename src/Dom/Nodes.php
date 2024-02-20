@@ -86,7 +86,7 @@ final class Nodes implements \IteratorAggregate, \Countable
     public function html(): ?string
     {
         try {
-            return \implode(' ', $this->map(static fn(Node $n) => $n->html())) ?: null;
+            return \implode(' ', $this->map(static fn(Node $n) => $n->outerHtml())) ?: null;
         } catch (\InvalidArgumentException) {
             return null;
         }
