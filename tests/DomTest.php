@@ -69,29 +69,6 @@ class DomTest extends TestCase
     /**
      * @test
      */
-    public function advanced_selector_assertions(): void
-    {
-        $this->dom()->assert()
-            ->containsIn(fn(Dom $dom) => $dom->findAll('ul li')->last(), 'list 3')
-        ;
-    }
-
-    /**
-     * @test
-     */
-    public function node_data(): void
-    {
-        $dom = $this->dom();
-
-        $this->assertSame('a link. not a link', $dom->find('#link')->text());
-        $this->assertSame('not a link', $dom->find('#link')->directText());
-        $this->assertSame('<a href="/page2" title="click here">a link.</a> not a link', $dom->find('#link')->innerHtml());
-        $this->assertSame('<p id="link"><a href="/page2" title="click here">a link.</a> not a link</p>', $dom->find('#link')->outerHtml());
-    }
-
-    /**
-     * @test
-     */
     public function find_or_fail(): void
     {
         $dom = $this->dom();
@@ -101,6 +78,50 @@ class DomTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $dom->findOrFail('#foobar');
+    }
+
+    /**
+     * @test
+     */
+    public function advanced_selector_assertions(): void
+    {
+        $this->dom()->assert()
+            ->containsIn(fn(Dom $dom) => $dom->findAll('ul li')->last(), 'list 3')
+        ;
+    }
+
+    /**
+     * @test
+     * @dataProvider nodeSelectorsDataProvider
+     */
+    public function node_selectors(mixed $expected, \Closure $actual): void
+    {
+        $dom = $this->dom();
+
+        $this->assertSame($expected, $actual($dom));
+    }
+
+    public static function nodeSelectorsDataProvider(): iterable
+    {
+        yield [
+            'a link. not a link',
+            fn(Dom $d) => $d->find('#link')->text(),
+        ];
+
+        yield [
+            'not a link',
+            fn(Dom $d) => $d->find('#link')->directText(),
+        ];
+
+        yield [
+            '<a href="/page2" title="click here">a link.</a> not a link',
+            fn(Dom $d) => $d->find('#link')->innerHtml(),
+        ];
+
+        yield [
+            '<p id="link"><a href="/page2" title="click here">a link.</a> not a link</p>',
+            fn(Dom $d) => $d->find('#link')->outerHtml(),
+        ];
     }
 
     protected function dom(): Dom
