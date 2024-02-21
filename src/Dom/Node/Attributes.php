@@ -18,6 +18,9 @@ namespace Zenstruck\Dom\Node;
  */
 final class Attributes implements \IteratorAggregate, \Countable
 {
+    /**
+     * @internal
+     */
     public function __construct(private \DOMElement $element)
     {
     }

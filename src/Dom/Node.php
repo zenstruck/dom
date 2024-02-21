@@ -28,7 +28,7 @@ class Node
 
     private Attributes $attributes;
 
-    private function __construct(private Crawler $crawler, protected readonly ?Session $session)
+    private function __construct(protected readonly Crawler $crawler, protected readonly ?Session $session)
     {
     }
 

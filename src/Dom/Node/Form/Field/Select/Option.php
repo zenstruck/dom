@@ -12,6 +12,7 @@
 namespace Zenstruck\Dom\Node\Form\Field\Select;
 
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Zenstruck\Dom\Node\Form\Field;
 use Zenstruck\Dom\Node\Form\Field\Select;
 use Zenstruck\Dom\Nodes;
@@ -40,7 +41,18 @@ final class Option extends Field
 
     public function selector(): ?Select
     {
-        return $this->ancestor('select')?->ensure(Select::class);
+        if (!$this->crawler instanceof PantherCrawler) {
+            return $this->ancestor('select')?->ensure(Select::class);
+        }
+
+        foreach ($this->ancestors() as $ancestor) {
+            // hack for panther - the above code doesn't work as expected - returns first select in document
+            if ('select' === $ancestor->tag()) {
+                return $ancestor->ensure(Select::class);
+            }
+        }
+
+        return null;
     }
 
     public function select(): void
