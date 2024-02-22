@@ -122,6 +122,24 @@ class DomTest extends TestCase
             '<p id="link"><a href="/page2" title="click here">a link.</a> not a link</p>',
             fn(Dom $d) => $d->find('#link')->outerHtml(),
         ];
+
+        yield [
+            'list 1 list 2 list 3',
+            fn(Dom $d) => $d->findAll('ul')->text(),
+        ];
+
+        yield [
+            <<<HTML
+            <ul>
+                <li>list 1</li>
+                <li>list 2</li>
+            </ul>
+            <ul>
+                <li>list 3</li>
+            </ul>
+            HTML,
+            fn(Dom $d) => $d->findAll('ul')->html(),
+        ];
     }
 
     protected function dom(): Dom
