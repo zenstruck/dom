@@ -156,15 +156,15 @@ class Node
     /**
      * @param SelectorType $selector
      */
-    final public function descendent(Selector|string|callable $selector): ?self
+    final public function descendant(Selector|string|callable $selector): ?self
     {
-        return $this->descendents($selector)->first();
+        return $this->descendants($selector)->first();
     }
 
     /**
      * @param SelectorType|null $selector
      */
-    final public function descendents(Selector|string|callable|null $selector = null): Nodes
+    final public function descendants(Selector|string|callable|null $selector = null): Nodes
     {
         return Nodes::create($this->crawler, $this->session)->filter($selector ?? Selector::xpath('descendant::*'));
     }

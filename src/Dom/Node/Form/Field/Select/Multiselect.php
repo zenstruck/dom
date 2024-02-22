@@ -24,7 +24,7 @@ final class Multiselect extends Select
 
     public function selectedOptions(): Nodes
     {
-        return $this->descendents('option[selected]');
+        return $this->descendants('option[selected]');
     }
 
     /**

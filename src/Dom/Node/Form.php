@@ -31,17 +31,17 @@ final class Form extends Node
      */
     public function fields(Selector|string|callable $selector = Field::SELECTOR): Nodes
     {
-        return $this->descendents($selector);
+        return $this->descendants($selector);
     }
 
     public function buttons(): Nodes
     {
-        return $this->descendents(Button::SELECTOR);
+        return $this->descendants(Button::SELECTOR);
     }
 
     public function submitButtons(): Nodes
     {
-        return $this->descendents('input[type="submit"],button[type="submit"]');
+        return $this->descendants('input[type="submit"],button[type="submit"]');
     }
 
     public function submitButton(): ?Button

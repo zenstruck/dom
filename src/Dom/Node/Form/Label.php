@@ -21,10 +21,10 @@ final class Label extends Element
     public function field(): ?Field
     {
         if ($for = $this->attributes()->get('for')) {
-            return $this->form()?->descendents(Selector::id($for))->first()?->ensure(Field::class);
+            return $this->form()?->descendants(Selector::id($for))->first()?->ensure(Field::class);
         }
 
         // check if wrapping field
-        return $this->descendents(Field::class)->first()?->ensure(Field::class);
+        return $this->descendants(Field::class)->first()?->ensure(Field::class);
     }
 }

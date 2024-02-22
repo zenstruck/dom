@@ -24,7 +24,7 @@ abstract class Select extends Field
 
     final public function availableOptions(): Nodes
     {
-        return $this->descendents('option');
+        return $this->descendants('option');
     }
 
     final public function optionMatching(string $value): ?Option
