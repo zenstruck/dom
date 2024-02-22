@@ -96,9 +96,10 @@ class DomTest extends TestCase
      */
     public function node_selectors(mixed $expected, \Closure $actual): void
     {
-        $dom = $this->dom();
+        $expected = self::normalizeWhitespace($expected);
+        $actual = self::normalizeWhitespace($actual($this->dom()));
 
-        $this->assertSame($expected, $actual($dom));
+        $this->assertSame($expected, $actual);
     }
 
     public static function nodeSelectorsDataProvider(): iterable
@@ -140,10 +141,40 @@ class DomTest extends TestCase
                 HTML,
             fn(Dom $d) => $d->findAll('ul')->html(),
         ];
+
+        yield [
+            'list 1 list 2',
+            fn(Dom $d) => $d->find('ul li')->parent()->text(),
+        ];
+
+        yield [
+            'list 2',
+            fn(Dom $d) => $d->find('ul li')->next()->text(),
+        ];
+
+        yield [
+            'list 1',
+            fn(Dom $d) => $d->find('ul li:last-child')->previous()->text(),
+        ];
+
+        yield [
+            'list 1 list 2',
+            fn(Dom $d) => $d->find('ul li')->closest('ul')->text(),
+        ];
+
+        yield [
+            'div 2 div 5 div 6 p 1',
+            fn(Dom $d) => $d->find('#div3')->siblings()->text(),
+        ];
     }
 
     protected function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/Fixtures/page.html'));
+    }
+
+    private static function normalizeWhitespace(mixed $value): mixed
+    {
+        return \is_string($value) ? \preg_replace('/\s+/', ' ', $value) : $value;
     }
 }

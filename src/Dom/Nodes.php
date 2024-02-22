@@ -76,20 +76,12 @@ final class Nodes implements \IteratorAggregate, \Countable
 
     public function text(): ?string
     {
-        try {
-            return \implode(' ', $this->map(static fn(Node $n) => $n->text())) ?: null;
-        } catch (\InvalidArgumentException) {
-            return null;
-        }
+        return \implode(' ', $this->map(static fn(Node $n) => $n->text())) ?: null;
     }
 
     public function html(): ?string
     {
-        try {
-            return \implode("\n", $this->map(static fn(Node $n) => $n->outerHtml())) ?: null;
-        } catch (\InvalidArgumentException) {
-            return null;
-        }
+        return \implode("\n", $this->map(static fn(Node $n) => $n->outerHtml())) ?: null;
     }
 
     public function getIterator(): \Traversable
