@@ -133,36 +133,24 @@ class Node
         return $closest ? self::create($closest, $this->session) : null;
     }
 
-    /**
-     * @param SelectorType $selector
-     */
-    final public function ancestor(Selector|string|callable $selector): ?self
+    final public function ancestor(): ?self
     {
-        return $this->ancestors($selector)->first();
+        return $this->ancestors()->first();
     }
 
-    /**
-     * @param SelectorType|null $selector
-     */
-    final public function ancestors(Selector|string|callable|null $selector = null): Nodes
+    final public function ancestors(): Nodes
     {
-        return $this->applySelectorTo($this->crawler->ancestors(), $selector);
+        return Nodes::create($this->crawler->ancestors(), $this->session);
     }
 
-    /**
-     * @param SelectorType|null $selector
-     */
-    final public function siblings(Selector|string|callable|null $selector = null): Nodes
+    final public function siblings(): Nodes
     {
-        return $this->applySelectorTo($this->crawler->siblings(), $selector);
+        return Nodes::create($this->crawler->siblings(), $this->session);
     }
 
-    /**
-     * @param SelectorType|null $selector
-     */
-    final public function children(Selector|string|callable|null $selector = null): Nodes
+    final public function children(): Nodes
     {
-        return $this->applySelectorTo($this->crawler->children(), $selector);
+        return Nodes::create($this->crawler->children(), $this->session);
     }
 
     /**
@@ -178,7 +166,7 @@ class Node
      */
     final public function descendents(Selector|string|callable|null $selector = null): Nodes
     {
-        return $this->applySelectorTo($this->crawler, $selector ?? Selector::xpath('descendant::*'));
+        return Nodes::create($this->crawler, $this->session)->filter($selector ?? Selector::xpath('descendant::*'));
     }
 
     /**
@@ -234,16 +222,6 @@ class Node
     final protected function ensureSession(): Session
     {
         return $this->session ?? throw new RuntimeException('No interactive session available.');
-    }
-
-    /**
-     * @param SelectorType|null $selector
-     */
-    private function applySelectorTo(Crawler $crawler, Selector|string|callable|null $selector = null): Nodes
-    {
-        $nodes = Nodes::create($crawler, $this->session);
-
-        return $selector ? $nodes->filter($selector) : $nodes;
     }
 
     private function normalizedCrawler(): Crawler

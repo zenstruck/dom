@@ -21,6 +21,6 @@ abstract class Element extends Node
 {
     final public function form(): ?Form
     {
-        return $this->ancestor('form')?->ensure(Form::class);
+        return $this->closest('form')?->ensure(Form::class);
     }
 }

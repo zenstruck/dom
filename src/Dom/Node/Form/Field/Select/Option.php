@@ -42,7 +42,7 @@ final class Option extends Field
     public function selector(): ?Select
     {
         if (!$this->crawler instanceof PantherCrawler) {
-            return $this->ancestor('select')?->ensure(Select::class);
+            return $this->closest('select')?->ensure(Select::class);
         }
 
         foreach ($this->ancestors() as $ancestor) {

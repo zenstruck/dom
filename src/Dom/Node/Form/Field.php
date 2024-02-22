@@ -31,7 +31,7 @@ abstract class Field extends Element
         }
 
         // check if wrapped in a label
-        return $this->ancestor('label')?->ensure(Label::class);
+        return $this->closest('label')?->ensure(Label::class);
     }
 
     final public function name(): ?string
