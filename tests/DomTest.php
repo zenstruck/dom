@@ -130,14 +130,14 @@ class DomTest extends TestCase
 
         yield [
             <<<HTML
-            <ul>
-                <li>list 1</li>
-                <li>list 2</li>
-            </ul>
-            <ul>
-                <li>list 3</li>
-            </ul>
-            HTML,
+                <ul>
+                    <li>list 1</li>
+                    <li>list 2</li>
+                </ul>
+                <ul>
+                    <li>list 3</li>
+                </ul>
+                HTML,
             fn(Dom $d) => $d->findAll('ul')->html(),
         ];
     }
