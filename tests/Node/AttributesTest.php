@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom\Node\Attributes;
 
 /**
- * @covers \Zenstruck\Dom\Node\Attributes
+ * @covers Attributes
  */
 final class AttributesTest extends TestCase
 {
@@ -28,7 +28,7 @@ final class AttributesTest extends TestCase
      */
     public function classes(string $classes, array $expected): void
     {
-        $element = new \DOMElement('test');
+        $element = (new \DOMDocument())->createElement('test');
         $element->setAttribute('class', $classes);
 
         $attributes = new Attributes($element);
@@ -63,7 +63,7 @@ final class AttributesTest extends TestCase
      */
     public function all(): void
     {
-        $element = new \DOMElement('test');
+        $element = (new \DOMDocument())->createElement('test');
         $element->setAttribute('foo', 'bar');
         $element->setAttribute('baz', 'qux');
 
@@ -76,7 +76,7 @@ final class AttributesTest extends TestCase
      */
     public function countable(): void
     {
-        $element = new \DOMElement('test');
+        $element = (new \DOMDocument())->createElement('test');
         $element->setAttribute('foo', 'bar');
         $element->setAttribute('baz', 'qux');
 
