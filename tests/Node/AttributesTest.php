@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom\Node\Attributes;
 
 /**
- * @covers Attributes
+ * @covers \Attributes
  */
 final class AttributesTest extends TestCase
 {
