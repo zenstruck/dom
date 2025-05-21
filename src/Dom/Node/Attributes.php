@@ -34,11 +34,11 @@ final class Attributes implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function classes(): array
     {
-        return \array_filter(\array_map('trim', \explode(' ', $this->get('class') ?? '')));
+        return \preg_split('/\s+/', $this->get('class') ?? '', -1, \PREG_SPLIT_NO_EMPTY) ?: [];
     }
 
     public function has(string $name): bool
