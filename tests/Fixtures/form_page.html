@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>meta title</title>
+    <meta name="description" content="meta description">
+</head>
+<body class="body-class">
+<form action="/submit-form-1" method="post" enctype="multipart/form-data" data-test-id="form_1">
+    <label for="input_1">Input 1</label>
+    <input id="input_1" name="input_1" type="text" value="input 1"/>
+
+    <label for="input_2">Input 2</label>
+    <select id="input_2" name="input_2">
+        <option value="option1">Option 1</option>
+        <option value="option2" selected>Option 2</option>
+        <option value="option3">Option 3</option>
+    </select>
+
+    <label for="input_3">Input for form 2</label>
+    <input id="input_3" name="input_3" form="form_2" type="checkbox">
+
+    <label for="input_4">Input for form 3</label>
+    <input id="input_4" name="input_4" form="form_3" type="checkbox">
+
+    <input id="input_5" name="input_5" type="submit" value="Submit"/>
+    <button id="input_6" name="input_6" type="submit">Submit</button>
+    <button id="input_7" name="input_7" type="button">Non-submit</button>
+    <input id="input_8" name="input_8" form="form_2" type="submit"/>
+    <button id="input_9" name="input_9" form="form_2" type="submit">Submit for form 2</button>
+</form>
+
+<form id="form_2" action="/submit-form-2" method="get" enctype="multipart/form-data" data-test-id="form_2">
+    <input id="input_10" name="input_10" type="text"/>
+    <input id="input_11" name="input_11" form="form_2" type="checkbox">
+    <input id="input_12" name="input_12" form="form_3" type="checkbox">
+</form>
+
+<form id="form_3" action="/submit-form-3" method="get" enctype="multipart/form-data" data-test-id="form_3">
+    <input id="input_13" name="input_14" form="form_2"/>
+</form>
+
+<input id="input_14" name="input_15" type="text"/>
+<input id="input_15" name="input_16" form="form_2" type="checkbox">
+<input id="input_16" name="input_17" form="form_3" type="checkbox">
+</body>
+</html>

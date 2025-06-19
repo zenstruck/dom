@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form;
 use Zenstruck\Dom\Node\Form\Button;
+use Zenstruck\Dom\Node\Form\Element;
 use Zenstruck\Dom\Node\Form\Field;
 use Zenstruck\Dom\Node\Form\Field\Checkbox;
 use Zenstruck\Dom\Node\Form\Field\Input;
@@ -360,6 +361,92 @@ final class FormTest extends TestCase
         foreach ($collection as $node) {
             $this->assertInstanceOf(Radio::class, $node);
             $this->assertSame('input_8', $node->ensure(Radio::class)->name());
+        }
+    }
+
+    #[Test]
+    public function form_without_id(): void
+    {
+        $dom = new Dom(\file_get_contents(__DIR__.'/../Fixtures/form_page.html'));
+        $form = $dom->find(Selector::css('[data-test-id=form_1]'))->ensure(Form::class);
+
+        $formFields = $form->fields();
+        $formButtons = $form->buttons();
+        $submitButtons = $form->submitButtons();
+        $submitButton = $form->submitButton();
+
+        // Check that only expected fields and buttons are returned
+        $this->assertCount(5, $formFields);
+        $fieldIds = $formFields->map(fn (Element $field) => $field->id());
+        $this->assertContains('input_1', $fieldIds);
+        $this->assertContains('input_2', $fieldIds);
+        $this->assertContains('input_5', $fieldIds);
+        $this->assertContains('input_6', $fieldIds);
+        $this->assertContains('input_7', $fieldIds);
+
+        $this->assertCount(3, $formButtons);
+        $buttonIds = $formButtons->map(fn (Element $button) => $button->id());
+        $this->assertContains('input_5', $buttonIds);
+        $this->assertContains('input_6', $buttonIds);
+        $this->assertContains('input_7', $buttonIds);
+
+        $this->assertCount(2, $form->submitButtons());
+        $submitButtonIds = $submitButtons->map(fn (Button $button) => $button->id());
+        $this->assertContains('input_5', $submitButtonIds);
+        $this->assertContains('input_6', $submitButtonIds);
+
+        $this->assertInstanceOf(Button::class, $submitButton);
+        $this->assertSame('input_5', $submitButton->id());
+
+        foreach ($formFields as $field) {
+            $this->assertInstanceOf(Element::class, $field);
+            // Check that the form is correctly identified
+            $this->assertEquals('form_1', $field->form()?->attributes()->get('data-test-id'), 'The field should identify the correct form');
+            // And that it does not have a "form" attribute
+            $this->assertFalse($field->attributes()->has('form'), 'Field should not have a "form" attribute');
+        }
+    }
+
+
+    #[Test]
+    public function form_with_id(): void
+    {
+        $dom = new Dom(\file_get_contents(__DIR__.'/../Fixtures/form_page.html'));
+        $form = $dom->find(Selector::css('[data-test-id=form_2]'))->ensure(Form::class);
+
+        $formFields = $form->fields();
+        $formButtons = $form->buttons();
+        $submitButtons = $form->submitButtons();
+        $submitButton = $form->submitButton();
+
+        // Check that only expected fields and buttons are returned
+        $this->assertCount(7, $formFields);
+        $fieldIds = $formFields->map(fn (Element $field) => $field->id());
+        $this->assertContains('input_3', $fieldIds);
+        $this->assertContains('input_8', $fieldIds);
+        $this->assertContains('input_9', $fieldIds);
+        $this->assertContains('input_10', $fieldIds);
+        $this->assertContains('input_11', $fieldIds);
+        $this->assertContains('input_13', $fieldIds);
+        $this->assertContains('input_15', $fieldIds);
+
+        $this->assertCount(2, $formButtons);
+        $buttonIds = $formButtons->map(fn (Element $button) => $button->id());
+        $this->assertContains('input_8', $buttonIds);
+        $this->assertContains('input_9', $buttonIds);
+
+        $this->assertCount(2, $submitButtons);
+        $submitButtonIds = $submitButtons->map(fn (Button $button) => $button->id());
+        $this->assertContains('input_8', $submitButtonIds);
+        $this->assertContains('input_9', $submitButtonIds);
+
+        $this->assertInstanceOf(Button::class, $submitButton);
+        $this->assertSame('input_8', $submitButton->id());
+
+        foreach ($formFields as $field) {
+            $this->assertInstanceOf(Element::class, $field);
+            // Check that the form is correctly identified
+            $this->assertEquals('form_2', $field->form()?->attributes()->get('data-test-id'), 'The field should identify the correct form');
         }
     }
 
