@@ -11,7 +11,6 @@
 
 namespace Zenstruck\Dom\Node;
 
-use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form\Button;
 use Zenstruck\Dom\Node\Form\Field;
@@ -52,30 +51,24 @@ final class Form extends Node
         $formId = $this->attributes()->get('id');
 
         // Filter out nodes that explicitly have a "form" attribute
-        $directDescendantsCrawler = $this->descendants($selector)
-            ->crawler()
-            ->reduce(function (Crawler $crawler) {
-                return !$crawler->getNode(0)?->attributes?->getNamedItem('form');
-        });
+        $directDescendants = $this->descendants($selector)
+            ->filter(Selector::xpath('(descendant-or-self::input | descendant-or-self::button | descendant-or-self::select | descendant-or-self::textarea)[not(@form)]'));
 
         // If the form doesn't have an id, return the nodes that match the selector and that don't have a "form" attribute.
         if (!\is_string($formId) || '' === $formId) {
-            return Nodes::create($directDescendantsCrawler, $this->session);
+            return $directDescendants;
         }
 
         // Find nodes in all the document that match the selector and have a "form" attribute that matches the form's id.
-        $referencingNodesCrawler = $this->ancestors()->last()
+        $referencingNodes = $this->ancestors()->last()
             ?->descendants($selector)
-            ->crawler()
-            ->reduce(function (Crawler $crawler) use ($formId) {
-                return $formId === $crawler->getNode(0)?->attributes?->getNamedItem('form')?->nodeValue;
-            });
+            ->filter(Selector::xpath(\sprintf('(descendant-or-self::input | descendant-or-self::button | descendant-or-self::select | descendant-or-self::textarea)[@form="%s"]', $formId)));;
 
-        if (null !== $referencingNodesCrawler && $referencingNodesCrawler->count() > 0) {
+        if (null !== $referencingNodes && $referencingNodes->count() > 0) {
             // Merge descendant nodes and nodes with a matching "form" attribute.
-            $directDescendantsCrawler->addNodes(\iterator_to_array($referencingNodesCrawler->getIterator()));
+            $directDescendants->crawler()->addNodes(\iterator_to_array($referencingNodes->crawler()->getIterator()));
         }
 
-        return Nodes::create($directDescendantsCrawler, $this->session);
+        return $directDescendants;
     }
 }

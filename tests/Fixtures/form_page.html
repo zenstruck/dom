@@ -18,7 +18,7 @@
     </select>
 
     <label for="input_3">Input for form 2</label>
-    <input id="input_3" name="input_3" form="form_2" type="checkbox">
+    <textarea id="input_3" name="input_3" form="form_2">Input for form 2</textarea>
 
     <label for="input_4">Input for form 3</label>
     <input id="input_4" name="input_4" form="form_3" type="checkbox">
@@ -33,7 +33,11 @@
 <form id="form_2" action="/submit-form-2" method="get" enctype="multipart/form-data" data-test-id="form_2">
     <input id="input_10" name="input_10" type="text"/>
     <input id="input_11" name="input_11" form="form_2" type="checkbox">
-    <input id="input_12" name="input_12" form="form_3" type="checkbox">
+    <select id="input_12" name="input_12" form="form_3">
+        <option value="option1">Option 1</option>
+        <option value="option2" selected>Option 2</option>
+        <option value="option3">Option 3</option>
+    </select>
 </form>
 
 <form id="form_3" action="/submit-form-3" method="get" enctype="multipart/form-data" data-test-id="form_3">
