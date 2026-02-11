@@ -11,21 +11,20 @@
 
 namespace Zenstruck\Dom\Tests\Node;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom\Node\Attributes;
 
-/**
- * @covers \Zenstruck\Dom\Node\Attributes
- */
+#[CoversClass(Attributes::class)]
 final class AttributesTest extends TestCase
 {
     /**
      * @param string[] $expected
-     *
-     * @dataProvider provideClassCases
-     *
-     * @test
      */
+    #[Test]
+    #[DataProvider('provideClassCases')]
     public function classes(string $classes, array $expected): void
     {
         $element = (new \DOMDocument())->createElement('test');
@@ -58,9 +57,7 @@ final class AttributesTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function all(): void
     {
         $element = (new \DOMDocument())->createElement('test');
@@ -71,9 +68,7 @@ final class AttributesTest extends TestCase
         $this->assertSame(['foo' => 'bar', 'baz' => 'qux'], $attributes->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function countable(): void
     {
         $element = (new \DOMDocument())->createElement('test');

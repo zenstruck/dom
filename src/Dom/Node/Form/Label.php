@@ -25,6 +25,6 @@ final class Label extends Element
         }
 
         // check if wrapping field
-        return $this->descendants(Field::class)->first()?->ensure(Field::class);
+        return $this->descendants(Selector::css(Field::SELECTOR))->first()?->ensure(Field::class);
     }
 }

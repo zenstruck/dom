@@ -11,23 +11,23 @@
 
 namespace Zenstruck\Dom\Tests;
 
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Panther\PantherTestCaseTrait;
 use Zenstruck\Dom;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
- *
- * @group panther
  */
-final class PantherChromeDomTest extends DomTest
+#[Group('panther')]
+final class PantherFirefoxDomTest extends DomTest
 {
     use PantherTestCaseTrait;
 
     protected function dom(): Dom
     {
         $client = self::createPantherClient([
-            'browser' => 'chrome',
-            'webServerDir' => __DIR__.'/Fixtures',
+            'browser' => 'firefox',
+            'webServerDir' => __DIR__.'/../Fixtures',
         ]);
         $client->get('/page.html');
 

@@ -131,7 +131,7 @@ final class Assertion
     {
         $this->hasElement($selector);
 
-        $attributes = \implode(' ', $this->dom->findAll($selector)->map(fn(Node $n) => $n->attributes()->get($attribute)));
+        $attributes = \implode(' ', $this->dom->findAll($selector)->map(static fn(Node $n) => $n->attributes()->get($attribute)));
 
         Assert::that($attributes)
             ->contains($expected, 'Element with selector "{selector}" attribute "{attribute}" does not contain "{expected}".', ['selector' => $selector, 'attribute' => $attribute, 'expected' => $expected], strict: false)
@@ -145,7 +145,7 @@ final class Assertion
      */
     public function attributeDoesNotContain(Selector|string|callable $selector, string $attribute, string $expected): static
     {
-        $attributes = \implode(' ', $this->dom->findAll($selector)->map(fn(Node $n) => $n->attributes()->get($attribute)));
+        $attributes = \implode(' ', $this->dom->findAll($selector)->map(static fn(Node $n) => $n->attributes()->get($attribute)));
 
         Assert::that($attributes)
             ->doesNotContain($expected, 'Element with selector "{selector}" attribute "{attribute}" contains "{expected}" but it should not.', ['selector' => $selector, 'attribute' => $attribute, 'expected' => $expected], strict: false)
@@ -161,7 +161,7 @@ final class Assertion
     {
         $field = $this->field($selector);
 
-        if ($expected == $field->value()) {
+        if ($expected === $field->value()) {
             Assert::pass();
 
             return $this;
@@ -219,7 +219,7 @@ final class Assertion
                 break;
 
             case Combobox::class:
-                if ($expected == $field->selectedValue()) {
+                if ($expected === $field->selectedValue()) {
                     Assert::pass();
 
                     break;

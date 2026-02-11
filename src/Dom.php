@@ -88,6 +88,8 @@ final class Dom
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @param SelectorType|null $selector
      */
     public function dump(Selector|string|callable|null $selector = null): static
@@ -100,6 +102,8 @@ final class Dom
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @param SelectorType $selector
      */
     public function dd(Selector|string|callable|null $selector = null): void

@@ -26,9 +26,6 @@ final class Form extends Node
 {
     public const SELECTOR = 'form';
 
-    /**
-     * @param SelectorType $selector
-     */
     public function fields(Selector|string|callable $selector = Field::SELECTOR): Nodes
     {
         return $this->descendants($selector);

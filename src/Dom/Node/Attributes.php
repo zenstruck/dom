@@ -57,7 +57,7 @@ final class Attributes implements \IteratorAggregate, \Countable
 
     public function is(string $name, string ...$oneOf): bool
     {
-        if (!$value = $this->get($name)) {
+        if (null === $value = $this->get($name)) {
             return false;
         }
 
@@ -81,6 +81,6 @@ final class Attributes implements \IteratorAggregate, \Countable
 
     public function count(): int
     {
-        return $this->element->attributes->count();
+        return \count($this->element->attributes);
     }
 }

@@ -28,7 +28,7 @@ class Node
 
     private Attributes $attributes;
 
-    private function __construct(protected readonly Crawler $crawler, protected readonly ?Session $session)
+    protected function __construct(protected readonly Crawler $crawler, protected readonly ?Session $session)
     {
     }
 
@@ -68,6 +68,20 @@ class Node
     {
         if ($this->crawler instanceof PantherCrawler) {
             return $this->crawler->isDisplayed();
+        }
+
+        if ($this->attributes()->has('hidden')) {
+            return false;
+        }
+
+        if ($this->attributes()->is('type', 'hidden')) {
+            return false;
+        }
+
+        $style = $this->attributes()->get('style') ?? '';
+
+        if (\preg_match('/display\s*:\s*none/i', $style) || \preg_match('/visibility\s*:\s*hidden/i', $style)) {
+            return false;
         }
 
         return true;
@@ -121,7 +135,7 @@ class Node
         return Nodes::create($this->crawler->nextAll(), $this->session)->first();
     }
 
-    public function previous(): ?self
+    final public function previous(): ?self
     {
         return Nodes::create($this->crawler->previousAll(), $this->session)->first();
     }
@@ -205,6 +219,9 @@ class Node
         $this->ensureSession()->click($this);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     final public function dump(): static
     {
         \function_exists('dump') ? dump($this->outerHtml()) : \var_dump($this->outerHtml());
@@ -212,6 +229,9 @@ class Node
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     final public function dd(): void
     {
         $this->dump();

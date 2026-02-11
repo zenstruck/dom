@@ -96,6 +96,9 @@ final class Nodes implements \IteratorAggregate, \Countable
         return \count($this->crawler);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function dump(): self
     {
         foreach ($this as $node) {
@@ -105,6 +108,9 @@ final class Nodes implements \IteratorAggregate, \Countable
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function dd(): void
     {
         $this->dump();
