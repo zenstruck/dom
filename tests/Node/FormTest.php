@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
+use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form;
 use Zenstruck\Dom\Node\Form\Button;
 use Zenstruck\Dom\Node\Form\Field;
@@ -363,8 +364,111 @@ final class FormTest extends TestCase
         }
     }
 
+    // --- Form Attribute Support ---
+
+    #[Test]
+    public function form_without_id_excludes_elements_with_form_attribute(): void
+    {
+        $dom = $this->formAttributeDom();
+        $form = $dom->findOrFail(Selector::css('[data-testid="form-no-id"]'))->ensure(Form::class);
+
+        $fields = $form->fields();
+        $fieldIds = $fields->map(static fn(Node $n) => $n->id());
+
+        // field1 and btn1 belong to form-no-id (no form attribute)
+        $this->assertContains('field1', $fieldIds);
+        $this->assertContains('btn1', $fieldIds);
+
+        // field2 and btn2 have form="form-with-id", so excluded
+        $this->assertNotContains('field2', $fieldIds);
+        $this->assertNotContains('btn2', $fieldIds);
+    }
+
+    #[Test]
+    public function form_with_id_includes_external_elements_with_form_attribute(): void
+    {
+        $dom = $this->formAttributeDom();
+        $form = $dom->findOrFail(Selector::css('[data-testid="form-with-id"]'))->ensure(Form::class);
+
+        $fields = $form->fields();
+        $fieldIds = $fields->map(static fn(Node $n) => $n->id());
+
+        // Direct children
+        $this->assertContains('field3', $fieldIds);
+        $this->assertContains('field4', $fieldIds);
+        $this->assertContains('btn3', $fieldIds);
+
+        // External elements with form="form-with-id"
+        $this->assertContains('field2', $fieldIds); // from form-no-id
+        $this->assertContains('field5', $fieldIds); // checkbox outside
+        $this->assertContains('field6', $fieldIds); // textarea outside
+        $this->assertContains('btn2', $fieldIds);   // button from form-no-id
+        $this->assertContains('btn4', $fieldIds);   // button outside
+    }
+
+    #[Test]
+    public function buttons_respects_form_attribute(): void
+    {
+        $dom = $this->formAttributeDom();
+
+        $formNoId = $dom->findOrFail(Selector::css('[data-testid="form-no-id"]'))->ensure(Form::class);
+        $formWithId = $dom->findOrFail(Selector::css('[data-testid="form-with-id"]'))->ensure(Form::class);
+
+        $noIdButtonIds = $formNoId->buttons()->map(fn(Button $b) => $b->id());
+        $withIdButtonIds = $formWithId->buttons()->map(fn(Button $b) => $b->id());
+
+        $this->assertContains('btn1', $noIdButtonIds);
+        $this->assertNotContains('btn2', $noIdButtonIds);
+
+        $this->assertContains('btn2', $withIdButtonIds);
+        $this->assertContains('btn3', $withIdButtonIds);
+        $this->assertContains('btn4', $withIdButtonIds);
+    }
+
+    #[Test]
+    public function element_form_returns_form_via_form_attribute(): void
+    {
+        $dom = $this->formAttributeDom();
+
+        // field5 is outside any form but has form="form-with-id"
+        $field = $dom->findOrFail(Selector::css('#field5'))->ensure(Checkbox::class);
+        $form = $field->form();
+
+        $this->assertInstanceOf(Form::class, $form);
+        $this->assertSame('form-with-id', $form->id());
+    }
+
+    #[Test]
+    public function element_form_returns_null_for_invalid_form_attribute(): void
+    {
+        $dom = $this->formAttributeDom();
+
+        // orphan2 has form="nonexistent" pointing to a non-existent form
+        $field = $dom->findOrFail(Selector::css('#orphan2'))->ensure(Input::class);
+
+        $this->assertNull($field->form());
+    }
+
+    #[Test]
+    public function element_form_falls_back_to_closest_form_ancestor(): void
+    {
+        $dom = $this->formAttributeDom();
+
+        // field1 has no form attribute, should use closest ancestor
+        $field = $dom->findOrFail(Selector::css('#field1'))->ensure(Input::class);
+        $form = $field->form();
+
+        $this->assertInstanceOf(Form::class, $form);
+        $this->assertSame('form-no-id', $form->attributes()->get('data-testid'));
+    }
+
     private function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/../Fixtures/page.html'));
+    }
+
+    private function formAttributeDom(): Dom
+    {
+        return new Dom(\file_get_contents(__DIR__.'/../Fixtures/form_attribute.html'));
     }
 }

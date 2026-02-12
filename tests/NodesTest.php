@@ -239,6 +239,85 @@ final class NodesTest extends TestCase
     }
 
     #[Test]
+    public function merge_combines_two_node_collections_from_same_document(): void
+    {
+        $crawler = new Crawler('<div><ul id="list1"><li id="a">A</li><li id="b">B</li></ul><ul id="list2"><li id="c">C</li></ul></div>');
+        $list1Items = $crawler->filter('#list1 li');
+        $list2Items = $crawler->filter('#list2 li');
+
+        $nodes1 = Nodes::create($list1Items, null);
+        $nodes2 = Nodes::create($list2Items, null);
+
+        $merged = $nodes1->merge($nodes2);
+
+        $this->assertCount(3, $merged);
+        $this->assertSame(['a', 'b', 'c'], $merged->map(static fn(Node $n) => $n->id()));
+    }
+
+    #[Test]
+    public function merge_preserves_original_collections(): void
+    {
+        $crawler = new Crawler('<div><ul id="list1"><li>A</li></ul><ul id="list2"><li>B</li></ul></div>');
+        $list1Items = $crawler->filter('#list1 li');
+        $list2Items = $crawler->filter('#list2 li');
+
+        $nodes1 = Nodes::create($list1Items, null);
+        $nodes2 = Nodes::create($list2Items, null);
+
+        $nodes1->merge($nodes2);
+
+        $this->assertCount(1, $nodes1);
+        $this->assertCount(1, $nodes2);
+    }
+
+    #[Test]
+    public function merge_with_empty_collection(): void
+    {
+        $crawler = new Crawler('<ul><li>A</li><li>B</li></ul>');
+        $items = $crawler->filter('li');
+        $empty = new Crawler();
+
+        $nodes = Nodes::create($items, null);
+        $emptyNodes = Nodes::create($empty, null);
+
+        $this->assertCount(2, $nodes->merge($emptyNodes));
+    }
+
+    #[Test]
+    public function reduce_filters_nodes_by_callback(): void
+    {
+        $crawler = (new Crawler('<ul><li id="a">A</li><li id="b">B</li><li id="c">C</li></ul>'))->filter('li');
+        $nodes = Nodes::create($crawler, null);
+
+        $filtered = $nodes->reduce(static fn(Node $n) => $n->id() !== 'b');
+
+        $this->assertCount(2, $filtered);
+        $this->assertSame(['a', 'c'], $filtered->map(static fn(Node $n) => $n->id()));
+    }
+
+    #[Test]
+    public function reduce_preserves_original_collection(): void
+    {
+        $crawler = (new Crawler('<ul><li>A</li><li>B</li></ul>'))->filter('li');
+        $nodes = Nodes::create($crawler, null);
+
+        $nodes->reduce(static fn(Node $n) => false);
+
+        $this->assertCount(2, $nodes);
+    }
+
+    #[Test]
+    public function reduce_returns_empty_when_nothing_matches(): void
+    {
+        $crawler = (new Crawler('<ul><li>A</li><li>B</li></ul>'))->filter('li');
+        $nodes = Nodes::create($crawler, null);
+
+        $filtered = $nodes->reduce(static fn(Node $n) => false);
+
+        $this->assertCount(0, $filtered);
+    }
+
+    #[Test]
     public function dump_outputs_each_node(): void
     {
         $nodes = Nodes::create((new Crawler($this->fixtureHtml()))->filter('li'), null);

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Attribute Test</title>
+</head>
+<body>
+    <!-- Form without ID: elements with form attribute should be excluded -->
+    <form action="/form-no-id" data-testid="form-no-id">
+        <input id="field1" name="field1" type="text" value="belongs to form-no-id"/>
+        <input id="field2" name="field2" type="text" value="excluded" form="form-with-id"/>
+        <button id="btn1" name="btn1" type="submit">Submit No ID</button>
+        <button id="btn2" name="btn2" type="submit" form="form-with-id">Submit With ID</button>
+    </form>
+
+    <!-- Form with ID: can have elements outside pointing to it -->
+    <form id="form-with-id" action="/form-with-id" data-testid="form-with-id">
+        <input id="field3" name="field3" type="text" value="direct child"/>
+        <select id="field4" name="field4">
+            <option value="a">Option A</option>
+            <option value="b" selected>Option B</option>
+        </select>
+        <button id="btn3" name="btn3" type="submit">Submit Form With ID</button>
+    </form>
+
+    <!-- Elements outside forms but referencing form-with-id -->
+    <div class="outside-forms">
+        <input id="field5" name="field5" type="checkbox" form="form-with-id"/>
+        <textarea id="field6" name="field6" form="form-with-id">External textarea</textarea>
+        <button id="btn4" name="btn4" type="submit" form="form-with-id">External Submit</button>
+    </div>
+
+    <!-- Orphan elements (no form attribute, not in any form) -->
+    <input id="orphan1" name="orphan1" type="text" value="orphan"/>
+    <input id="orphan2" name="orphan2" type="text" value="orphan pointing to nonexistent" form="nonexistent"/>
+</body>
+</html>

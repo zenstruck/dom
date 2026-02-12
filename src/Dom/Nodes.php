@@ -61,6 +61,30 @@ final class Nodes implements \IteratorAggregate, \Countable
         return self::create(Selector::wrap($selector)->filter($this->crawler), $this->session);
     }
 
+    public function merge(self $other): self
+    {
+        $nodes = \iterator_to_array($this->crawler->getIterator());
+
+        foreach ($other->crawler->getIterator() as $node) {
+            $nodes[] = $node;
+        }
+
+        $crawler = new Crawler();
+        $crawler->add($nodes);
+
+        return new self($crawler, $this->session);
+    }
+
+    /**
+     * @param callable(Node, int): bool $callback
+     */
+    public function reduce(callable $callback): self
+    {
+        return new self($this->crawler->reduce(function (Crawler $nodeCrawler, int $i) use ($callback) {
+            return $callback(Node::create($nodeCrawler, $this->session), $i);
+        }), $this->session);
+    }
+
     /**
      * @template Input of Node
      * @template Return

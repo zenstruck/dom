@@ -296,6 +296,31 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
+    public function root_returns_document_root(): void
+    {
+        $dom = new Dom($this->fixtureHtml());
+        $div5 = $dom->find('#div5');
+
+        $this->assertNotNull($div5);
+
+        $root = $div5->root();
+
+        $this->assertSame('html', $root->tag());
+    }
+
+    #[Test]
+    public function root_returns_html_element_for_full_document(): void
+    {
+        $crawler = new Crawler('<!DOCTYPE html><html><body><div id="deep"><span>content</span></div></body></html>');
+        $span = $crawler->filter('span');
+        $node = Node::create($span, null);
+
+        $root = $node->root();
+
+        $this->assertSame('html', $root->tag());
+    }
+
+    #[Test]
     public function siblings_returns_sibling_nodes(): void
     {
         $dom = new Dom($this->fixtureHtml());
