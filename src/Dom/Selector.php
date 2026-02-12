@@ -159,7 +159,7 @@ final class Selector implements \Stringable
     }
 
     /**
-     * @internal
+     * @internal Do not use outside of zenstruck/dom. Subject to removal or signature changes without notice.
      */
     public function filter(Crawler $crawler): Crawler
     {
@@ -179,7 +179,7 @@ final class Selector implements \Stringable
         foreach ($types as $type) {
             try {
                 $filtered = self::filterByType($crawler, $type, $this->value);
-            } catch (\Throwable) {
+            } catch (\InvalidArgumentException|\Symfony\Component\CssSelector\Exception\ParseException) {
                 $filtered = new Crawler();
             }
 
@@ -270,14 +270,44 @@ final class Selector implements \Stringable
 
     private static function xpathEquals(string $element, string $value, ?string $attribute = null): string
     {
-        return \sprintf('descendant-or-self::%s[%s = "%s"]', $element, self::xpathNormalize($attribute), \mb_strtolower($value));
+        return \sprintf('descendant-or-self::%s[%s = %s]', $element, self::xpathNormalize($attribute), self::xpathQuote(\mb_strtolower($value)));
     }
 
     private static function xpathContains(string $element, string $value, ?string $attribute = null): string
     {
-        return \sprintf('descendant-or-self::%s[contains(%s, "%s")]', $element, self::xpathNormalize($attribute), \mb_strtolower($value));
+        return \sprintf('descendant-or-self::%s[contains(%s, %s)]', $element, self::xpathNormalize($attribute), self::xpathQuote(\mb_strtolower($value)));
     }
 
+    private static function xpathQuote(string $value): string
+    {
+        if (!\str_contains($value, '"')) {
+            return \sprintf('"%s"', $value);
+        }
+
+        if (!\str_contains($value, "'")) {
+            return \sprintf("'%s'", $value);
+        }
+
+        $parts = [];
+
+        foreach (\explode('"', $value) as $i => $part) {
+            if ($i > 0) {
+                $parts[] = "'\"'";
+            }
+
+            if ('' !== $part) {
+                $parts[] = \sprintf('"%s"', $part);
+            }
+        }
+
+        return \sprintf('concat(%s)', \implode(', ', $parts));
+    }
+
+    /**
+     * XPath 1.0 only supports ASCII case folding via translate(). Non-ASCII characters
+     * (accented letters, non-Latin scripts) will not be case-normalized. This is an inherent
+     * limitation of XPath 1.0 and cannot be fully resolved without post-filtering in PHP.
+     */
     private static function xpathNormalize(?string $attribute): string
     {
         return \sprintf(

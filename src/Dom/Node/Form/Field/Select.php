@@ -40,7 +40,7 @@ abstract class Select extends Field
      */
     final public function availableValues(): array
     {
-        return \array_filter($this->availableOptions()->map(fn(Option $option) => $option->value()));
+        return \array_filter($this->availableOptions()->map(static fn(Option $option) => $option->value()));
     }
 
     final public function isMultiple(): bool
