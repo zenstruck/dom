@@ -79,4 +79,76 @@ final class AttributesTest extends TestCase
         $this->assertCount(2, $attributes);
         $this->assertEquals(2, $attributes->count());
     }
+
+    #[Test]
+    public function has_returns_true_when_attribute_exists(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('foo', 'bar');
+
+        $attributes = new Attributes($element);
+        $this->assertTrue($attributes->has('foo'));
+        $this->assertFalse($attributes->has('baz'));
+    }
+
+    #[Test]
+    public function get_returns_null_when_attribute_missing(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $attributes = new Attributes($element);
+
+        $this->assertNull($attributes->get('nonexistent'));
+    }
+
+    #[Test]
+    public function get_returns_value_when_attribute_exists(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('foo', 'bar');
+
+        $attributes = new Attributes($element);
+        $this->assertSame('bar', $attributes->get('foo'));
+    }
+
+    #[Test]
+    public function is_returns_false_when_attribute_missing(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $attributes = new Attributes($element);
+
+        $this->assertFalse($attributes->is('type', 'text'));
+    }
+
+    #[Test]
+    public function is_matches_single_value(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('type', 'text');
+
+        $attributes = new Attributes($element);
+        $this->assertTrue($attributes->is('type', 'text'));
+        $this->assertFalse($attributes->is('type', 'checkbox'));
+    }
+
+    #[Test]
+    public function is_matches_one_of_multiple_values(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('type', 'submit');
+
+        $attributes = new Attributes($element);
+        $this->assertTrue($attributes->is('type', 'button', 'submit', 'reset'));
+        $this->assertFalse($attributes->is('type', 'text', 'checkbox', 'radio'));
+    }
+
+    #[Test]
+    public function is_comparison_is_case_insensitive(): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('type', 'TEXT');
+
+        $attributes = new Attributes($element);
+        $this->assertTrue($attributes->is('type', 'text'));
+        $this->assertTrue($attributes->is('type', 'Text'));
+    }
 }

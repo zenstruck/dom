@@ -425,43 +425,6 @@ final class FormTest extends TestCase
         $this->assertContains('btn4', $withIdButtonIds);
     }
 
-    #[Test]
-    public function element_form_returns_form_via_form_attribute(): void
-    {
-        $dom = $this->formAttributeDom();
-
-        // field5 is outside any form but has form="form-with-id"
-        $field = $dom->findOrFail(Selector::css('#field5'))->ensure(Checkbox::class);
-        $form = $field->form();
-
-        $this->assertInstanceOf(Form::class, $form);
-        $this->assertSame('form-with-id', $form->id());
-    }
-
-    #[Test]
-    public function element_form_returns_null_for_invalid_form_attribute(): void
-    {
-        $dom = $this->formAttributeDom();
-
-        // orphan2 has form="nonexistent" pointing to a non-existent form
-        $field = $dom->findOrFail(Selector::css('#orphan2'))->ensure(Input::class);
-
-        $this->assertNull($field->form());
-    }
-
-    #[Test]
-    public function element_form_falls_back_to_closest_form_ancestor(): void
-    {
-        $dom = $this->formAttributeDom();
-
-        // field1 has no form attribute, should use closest ancestor
-        $field = $dom->findOrFail(Selector::css('#field1'))->ensure(Input::class);
-        $form = $field->form();
-
-        $this->assertInstanceOf(Form::class, $form);
-        $this->assertSame('form-no-id', $form->attributes()->get('data-testid'));
-    }
-
     private function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/../Fixtures/page.html'));

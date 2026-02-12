@@ -346,6 +346,15 @@ PHP;
         $this->assertStringContainsString('list 1', $process->getOutput());
     }
 
+    #[Test]
+    public function crawler_returns_internal_crawler(): void
+    {
+        $crawler = (new Crawler($this->fixtureHtml()))->filter('li');
+        $nodes = Nodes::create($crawler, null);
+
+        $this->assertSame($crawler, $nodes->crawler());
+    }
+
     private function fixtureHtml(): string
     {
         return \file_get_contents(__DIR__.'/Fixtures/page.html');
