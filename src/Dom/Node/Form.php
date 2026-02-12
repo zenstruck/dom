@@ -28,21 +28,47 @@ final class Form extends Node
 
     public function fields(Selector|string|callable $selector = Field::SELECTOR): Nodes
     {
-        return $this->descendants($selector);
+        return $this->findNodesForForm($selector);
     }
 
     public function buttons(): Nodes
     {
-        return $this->descendants(Button::SELECTOR);
+        return $this->findNodesForForm(Button::SELECTOR);
     }
 
     public function submitButtons(): Nodes
     {
-        return $this->descendants('input[type="submit"],button[type="submit"]');
+        return $this->findNodesForForm('input[type="submit"],button[type="submit"]');
     }
 
     public function submitButton(): ?Button
     {
         return $this->submitButtons()->first()?->ensure(Button::class);
+    }
+
+    /**
+     * Find form elements, accounting for the HTML5 `form` attribute.
+     *
+     * Elements with a `form` attribute pointing to another form are excluded.
+     * Elements outside this form but with `form="{this-form-id}"` are included.
+     */
+    private function findNodesForForm(Selector|string|callable $selector): Nodes
+    {
+        $formId = $this->id();
+
+        // Direct descendants without explicit form attribute pointing elsewhere
+        $directDescendants = $this->descendants($selector)
+            ->reduce(static fn(Node $node) => !$node->attributes()->has('form'));
+
+        if (null === $formId || '' === $formId) {
+            return $directDescendants;
+        }
+
+        // Find elements anywhere in document with form="{id}"
+        $referencingNodes = $this->root()
+            ->descendants($selector)
+            ->reduce(static fn(Node $node) => $node->attributes()->is('form', $formId));
+
+        return $directDescendants->merge($referencingNodes);
     }
 }

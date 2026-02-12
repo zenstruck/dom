@@ -532,6 +532,51 @@ final class SelectorTest extends TestCase
         $this->assertCount(1, $result);
     }
 
+    #[Test]
+    public function filter_link_with_partial_text_match(): void
+    {
+        $crawler = new Crawler('<html><body><a href="/page">Click here for more information</a></body></html>');
+        $selector = Selector::link('more information');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(1, $result);
+    }
+
+    #[Test]
+    public function filter_link_by_title_attribute(): void
+    {
+        $crawler = new Crawler('<html><body><a href="/page" title="Go to dashboard">Icon</a></body></html>');
+        $selector = Selector::link('dashboard');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(1, $result);
+    }
+
+    #[Test]
+    public function filter_field_for_label_with_nested_input(): void
+    {
+        $crawler = new Crawler('<html><body><form><label>Username <input type="text" name="user"></label></form></body></html>');
+        $selector = Selector::fieldForLabel('Username');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('input', $result->nodeName());
+    }
+
+    #[Test]
+    public function auto_priority_falls_back_to_image(): void
+    {
+        $crawler = new Crawler('<html><body><a href="/page"><img alt="Submit Image" src="test.png"/></a></body></html>');
+        $selector = Selector::wrap('Submit Image');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(1, $result);
+    }
+
     private function createCrawler(): Crawler
     {
         return new Crawler(\file_get_contents(__DIR__.'/Fixtures/page.html'));

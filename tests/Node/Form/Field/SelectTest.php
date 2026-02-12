@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests\Node\Field;
+namespace Zenstruck\Dom\Tests\Node\Form\Field;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -37,7 +37,7 @@ final class SelectTest extends TestCase
     #[Test]
     public function option_matching_prefers_exact_then_contains_case_insensitive(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
         $select = $dom->findOrFail(Selector::css('#input4'))->ensure(Combobox::class);
 
         $exact = $select->optionMatching('OPTION 2');
@@ -52,7 +52,7 @@ final class SelectTest extends TestCase
     #[Test]
     public function is_multiple_reflects_attribute(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
 
         $single = $dom->findOrFail(Selector::css('#input4'))->ensure(Combobox::class);
         $multi = $dom->findOrFail(Selector::css('#input7'))->ensure(Multiselect::class);

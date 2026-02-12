@@ -296,6 +296,31 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
+    public function root_returns_document_root(): void
+    {
+        $dom = new Dom($this->fixtureHtml());
+        $div5 = $dom->find('#div5');
+
+        $this->assertNotNull($div5);
+
+        $root = $div5->root();
+
+        $this->assertSame('html', $root->tag());
+    }
+
+    #[Test]
+    public function root_returns_html_element_for_full_document(): void
+    {
+        $crawler = new Crawler('<!DOCTYPE html><html><body><div id="deep"><span>content</span></div></body></html>');
+        $span = $crawler->filter('span');
+        $node = Node::create($span, null);
+
+        $root = $node->root();
+
+        $this->assertSame('html', $root->tag());
+    }
+
+    #[Test]
     public function siblings_returns_sibling_nodes(): void
     {
         $dom = new Dom($this->fixtureHtml());
@@ -454,6 +479,81 @@ final class NodeTest extends TestCase
         $node = Node::create($crawler, null);
 
         $this->assertNull($node->id());
+    }
+
+    #[Test]
+    public function create_returns_button_for_input_type_button(): void
+    {
+        $crawler = (new Crawler('<input type="button" value="Click">'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertInstanceOf(Button::class, $node);
+    }
+
+    #[Test]
+    public function create_returns_button_for_input_type_reset(): void
+    {
+        $crawler = (new Crawler('<input type="reset" value="Reset">'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertInstanceOf(Button::class, $node);
+    }
+
+    #[Test]
+    public function create_returns_button_for_input_type_image(): void
+    {
+        $crawler = (new Crawler('<input type="image" src="btn.png" alt="Go">'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertInstanceOf(Button::class, $node);
+    }
+
+    #[Test]
+    public function ancestor_returns_first_ancestor(): void
+    {
+        $dom = new Dom($this->fixtureHtml());
+        $div5 = $dom->find('#div5');
+
+        $this->assertNotNull($div5);
+
+        $ancestor = $div5->ancestor();
+
+        $this->assertNotNull($ancestor);
+        $this->assertSame('div4', $ancestor->id());
+    }
+
+    #[Test]
+    public function ancestor_returns_null_for_root(): void
+    {
+        $crawler = (new Crawler('<!DOCTYPE html><html><body>content</body></html>'))->filter('html');
+        $node = Node::create($crawler, null);
+
+        $this->assertNull($node->ancestor());
+    }
+
+    #[Test]
+    public function descendant_returns_first_matching_descendant(): void
+    {
+        $dom = new Dom($this->fixtureHtml());
+        $div1 = $dom->find('#div1');
+
+        $this->assertNotNull($div1);
+
+        $descendant = $div1->descendant('p');
+
+        $this->assertNotNull($descendant);
+        $this->assertSame('p1', $descendant->id());
+    }
+
+    #[Test]
+    public function descendant_returns_null_when_no_match(): void
+    {
+        $dom = new Dom($this->fixtureHtml());
+        $div5 = $dom->find('#div5');
+
+        $this->assertNotNull($div5);
+
+        $this->assertNull($div5->descendant('table'));
     }
 
     private function fixtureHtml(): string

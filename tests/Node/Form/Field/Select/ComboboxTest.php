@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests\Node\Field\Select;
+namespace Zenstruck\Dom\Tests\Node\Form\Field\Select;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,7 +27,7 @@ final class ComboboxTest extends TestCase
     #[Test]
     public function selected_option_and_text_value(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));
 
         $selected = $dom->findOrFail(Selector::css('#input10'))->ensure(Combobox::class);
         $this->assertInstanceOf(Option::class, $selected->selectedOption());
@@ -43,7 +43,7 @@ final class ComboboxTest extends TestCase
     public function select_calls_session(): void
     {
         $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
         $combobox = $dom->findOrFail(Selector::css('#input4'))->ensure(Combobox::class);
 
         $combobox->select('Another');
@@ -65,6 +65,6 @@ final class ComboboxTest extends TestCase
 
     private function dom(): Dom
     {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));
     }
 }

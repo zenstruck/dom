@@ -9,11 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests;
+namespace Zenstruck\Dom\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Panther\PantherTestCaseTrait;
 use Zenstruck\Dom;
+use Zenstruck\Dom\Tests\DomTest;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>

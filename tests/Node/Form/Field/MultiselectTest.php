@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests\Node\Field;
+namespace Zenstruck\Dom\Tests\Node\Form\Field;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -81,6 +81,6 @@ final class MultiselectTest extends TestCase
 
     private function dom(?TestSession $session = null): Dom
     {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'), $session);
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
     }
 }

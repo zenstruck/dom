@@ -157,6 +157,11 @@ class Node
         return Nodes::create($this->crawler->ancestors(), $this->session);
     }
 
+    final public function root(): self
+    {
+        return $this->ancestors()->last() ?? $this;
+    }
+
     final public function siblings(): Nodes
     {
         return Nodes::create($this->crawler->siblings(), $this->session);
