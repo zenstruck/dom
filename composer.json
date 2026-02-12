@@ -14,8 +14,7 @@
     "require": {
         "php": ">=8.3",
         "symfony/css-selector": "^6.4|^7.0|^8.0",
-        "symfony/dom-crawler": "^6.4|^7.0|^8.0",
-        "symfony/polyfill-mbstring": "^1.30"
+        "symfony/dom-crawler": "^6.4|^7.0|^8.0"
     },
     "require-dev": {
         "dbrekelmans/bdi": "^1.1",
