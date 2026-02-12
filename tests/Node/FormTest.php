@@ -414,8 +414,8 @@ final class FormTest extends TestCase
         $formNoId = $dom->findOrFail(Selector::css('[data-testid="form-no-id"]'))->ensure(Form::class);
         $formWithId = $dom->findOrFail(Selector::css('[data-testid="form-with-id"]'))->ensure(Form::class);
 
-        $noIdButtonIds = $formNoId->buttons()->map(fn(Button $b) => $b->id());
-        $withIdButtonIds = $formWithId->buttons()->map(fn(Button $b) => $b->id());
+        $noIdButtonIds = $formNoId->buttons()->map(static fn(Button $b) => $b->id());
+        $withIdButtonIds = $formWithId->buttons()->map(static fn(Button $b) => $b->id());
 
         $this->assertContains('btn1', $noIdButtonIds);
         $this->assertNotContains('btn2', $noIdButtonIds);

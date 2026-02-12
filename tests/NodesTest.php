@@ -289,7 +289,7 @@ final class NodesTest extends TestCase
         $crawler = (new Crawler('<ul><li id="a">A</li><li id="b">B</li><li id="c">C</li></ul>'))->filter('li');
         $nodes = Nodes::create($crawler, null);
 
-        $filtered = $nodes->reduce(static fn(Node $n) => $n->id() !== 'b');
+        $filtered = $nodes->reduce(static fn(Node $n) => 'b' !== $n->id());
 
         $this->assertCount(2, $filtered);
         $this->assertSame(['a', 'c'], $filtered->map(static fn(Node $n) => $n->id()));

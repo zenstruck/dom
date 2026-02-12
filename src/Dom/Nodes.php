@@ -80,7 +80,7 @@ final class Nodes implements \IteratorAggregate, \Countable
      */
     public function reduce(callable $callback): self
     {
-        return new self($this->crawler->reduce(function (Crawler $nodeCrawler, int $i) use ($callback) {
+        return new self($this->crawler->reduce(function(Crawler $nodeCrawler, int $i) use ($callback) {
             return $callback(Node::create($nodeCrawler, $this->session), $i);
         }), $this->session);
     }
