@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests\Node\Field\Select;
+namespace Zenstruck\Dom\Tests\Node\Form\Field\Select;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,7 +26,7 @@ final class OptionTest extends TestCase
     #[Test]
     public function value_and_selected_state(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));
 
         $withValue = $dom->findOrFail(Selector::css('#input10 option[selected]'))->ensure(Option::class);
         $this->assertSame('option 3', $withValue->value());
@@ -40,7 +40,7 @@ final class OptionTest extends TestCase
     #[Test]
     public function selector_and_collection_resolve_parent_select(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));
         $option = $dom->findOrFail(Selector::css('#input4 option:first-child'))->ensure(Option::class);
 
         $this->assertInstanceOf(Combobox::class, $option->selector());
@@ -61,7 +61,7 @@ final class OptionTest extends TestCase
     public function select_calls_session(): void
     {
         $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
         $option = $dom->findOrFail(Selector::css('#input4 option[value="option 2"]'))->ensure(Option::class);
 
         $option->select();

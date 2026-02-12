@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Zenstruck\Dom\Tests\Node\Field;
+namespace Zenstruck\Dom\Tests\Node\Form\Field;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,7 +25,7 @@ final class FileTest extends TestCase
     #[Test]
     public function is_multiple_reflects_attribute(): void
     {
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'));
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
 
         $single = $dom->findOrFail(Selector::css('#input5'))->ensure(File::class);
         $multiple = $dom->findOrFail(Selector::css('#input9'))->ensure(File::class);
@@ -38,7 +38,7 @@ final class FileTest extends TestCase
     public function attach_throws_when_multiple_files_on_single(): void
     {
         $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'), $session);
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
         $file = $dom->findOrFail(Selector::css('#input5'))->ensure(File::class);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -51,7 +51,7 @@ final class FileTest extends TestCase
     public function attach_throws_when_file_missing(): void
     {
         $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'), $session);
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
         $file = $dom->findOrFail(Selector::css('#input5'))->ensure(File::class);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -64,7 +64,7 @@ final class FileTest extends TestCase
     public function attach_calls_session_for_valid_files(): void
     {
         $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../Fixtures/page.html'), $session);
+        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
         $file = $dom->findOrFail(Selector::css('#input9'))->ensure(File::class);
 
         $tmp = \tempnam(\sys_get_temp_dir(), 'dom-file-');
