@@ -161,7 +161,7 @@ final class Assertion
     {
         $field = $this->field($selector);
 
-        if ($expected === $field->value()) {
+        if ($expected == $field->value()) {
             Assert::pass();
 
             return $this;
