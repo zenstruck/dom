@@ -319,6 +319,86 @@ final class Assertion
     }
 
     /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsDisabled(Selector|string|callable $selector): static
+    {
+        Assert::true($this->field($selector)->isDisabled(), 'Field with selector "{selector}" is not disabled.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsEnabled(Selector|string|callable $selector): static
+    {
+        Assert::false($this->field($selector)->isDisabled(), 'Field with selector "{selector}" is disabled but it should not be.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsRequired(Selector|string|callable $selector): static
+    {
+        Assert::true($this->field($selector)->isRequired(), 'Field with selector "{selector}" is not required.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsOptional(Selector|string|callable $selector): static
+    {
+        Assert::false($this->field($selector)->isRequired(), 'Field with selector "{selector}" is required but it should not be.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsReadonly(Selector|string|callable $selector): static
+    {
+        Assert::true($this->field($selector)->isReadonly(), 'Field with selector "{selector}" is not readonly.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsNotReadonly(Selector|string|callable $selector): static
+    {
+        Assert::false($this->field($selector)->isReadonly(), 'Field with selector "{selector}" is readonly but it should not be.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsInert(Selector|string|callable $selector): static
+    {
+        Assert::true($this->field($selector)->isInert(), 'Field with selector "{selector}" is not inert.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function fieldIsNotInert(Selector|string|callable $selector): static
+    {
+        Assert::false($this->field($selector)->isInert(), 'Field with selector "{selector}" is inert but it should not be.', ['selector' => $selector]);
+
+        return $this;
+    }
+
+    /**
      * @template N as Node
      *
      * @param SelectorType    $selector
