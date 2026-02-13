@@ -195,7 +195,7 @@ final class Selector implements \Stringable
     {
         return match ($type) {
             self::TYPE_CSS => $crawler->filter($value),
-            self::TYPE_ID => $crawler->filter(\sprintf('#%s', \ltrim($value, '#'))),
+            self::TYPE_ID => $crawler->filter(\sprintf('#%s', \mb_ltrim($value, '#'))),
             self::TYPE_LINK => self::filterLink($crawler, $value),
             self::TYPE_BUTTON => $crawler->selectButton($value),
             self::TYPE_IMAGE => $crawler->selectImage($value),
