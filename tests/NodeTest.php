@@ -473,6 +473,37 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
+    public function attr_returns_attribute_value(): void
+    {
+        $crawler = (new Crawler('<div title="my title">content</div>'))->filter('div');
+        $node = Node::create($crawler, null);
+
+        $this->assertSame('my title', $node->attr('title'));
+        $this->assertNull($node->attr('id'));
+    }
+
+    #[Test]
+    public function data_returns_data_attribute_value(): void
+    {
+        $crawler = (new Crawler('<div data-testid="my-testid">content</div>'))->filter('div');
+        $node = Node::create($crawler, null);
+
+        $this->assertSame('my-testid', $node->data('testid'));
+        $this->assertNull($node->data('other'));
+    }
+
+    #[Test]
+    public function has_class(): void
+    {
+        $crawler = (new Crawler('<div class="foo bar">content</div>'))->filter('div');
+        $node = Node::create($crawler, null);
+
+        $this->assertTrue($node->hasClass('foo'));
+        $this->assertTrue($node->hasClass('bar'));
+        $this->assertFalse($node->hasClass('baz'));
+    }
+
+    #[Test]
     public function id_returns_null_when_no_id(): void
     {
         $crawler = (new Crawler('<div>content</div>'))->filter('div');
