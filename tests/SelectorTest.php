@@ -89,6 +89,14 @@ final class SelectorTest extends TestCase
     }
 
     #[Test]
+    public function testid_returns_selector_instance(): void
+    {
+        $selector = Selector::testId('my-id');
+
+        $this->assertInstanceOf(Selector::class, $selector);
+    }
+
+    #[Test]
     public function clickable_returns_selector_instance(): void
     {
         $selector = Selector::clickable('Submit');
@@ -142,6 +150,7 @@ final class SelectorTest extends TestCase
         $this->assertSame('link:==:a link', (string) Selector::link('a link'));
         $this->assertSame('button:==:Submit', (string) Selector::button('Submit'));
         $this->assertSame('image:==:Submit Image', (string) Selector::image('Submit Image'));
+        $this->assertSame('testid:==:my-id', (string) Selector::testId('my-id'));
     }
 
     #[Test]
@@ -352,6 +361,29 @@ final class SelectorTest extends TestCase
         $result = $selector->filter($crawler);
 
         $this->assertCount(1, $result);
+    }
+
+    #[Test]
+    public function filter_with_testid_selector(): void
+    {
+        $crawler = new Crawler('<html><body><div data-testid="my-id">foo</div></body></html>');
+        $selector = Selector::testId('my-id');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('div', $result->nodeName());
+    }
+
+    #[Test]
+    public function filter_with_testid_no_match(): void
+    {
+        $crawler = new Crawler('<html><body><div data-testid="other-id">foo</div></body></html>');
+        $selector = Selector::testId('my-id');
+
+        $result = $selector->filter($crawler);
+
+        $this->assertCount(0, $result);
     }
 
     #[Test]
