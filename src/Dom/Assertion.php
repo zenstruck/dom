@@ -319,6 +319,18 @@ final class Assertion
     }
 
     /**
+     * @param SelectorType $selector
+     */
+    public function hasTestId(Selector|string|callable $selector, string $expected): static
+    {
+        Assert::that($this->node($selector)->attributes()->get('data-testid'))
+            ->equals($expected, 'Element with selector "{selector}" does not have data-testid "{expected}".', ['selector' => $selector, 'expected' => $expected])
+        ;
+
+        return $this;
+    }
+
+    /**
      * @template N as Node
      *
      * @param SelectorType    $selector
