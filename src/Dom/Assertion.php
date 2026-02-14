@@ -157,6 +157,70 @@ final class Assertion
     /**
      * @param SelectorType $selector
      */
+    public function attributeEquals(Selector|string|callable $selector, string $attribute, string $expected): static
+    {
+        $this->hasElement($selector);
+
+        $value = $this->node($selector)->attributes()->get($attribute);
+
+        Assert::that($value)
+            ->equals($expected, 'Element with selector "{selector}" attribute "{attribute}" does not equal "{expected}".', ['selector' => $selector, 'attribute' => $attribute, 'expected' => $expected])
+        ;
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function attributeNotEquals(Selector|string|callable $selector, string $attribute, string $expected): static
+    {
+        $value = $this->dom->find($selector)?->attributes()->get($attribute);
+
+        Assert::that($value)
+            ->isNotEqualTo($expected, 'Element with selector "{selector}" attribute "{attribute}" equals "{expected}" but it should not.', ['selector' => $selector, 'attribute' => $attribute, 'expected' => $expected])
+        ;
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function hasClass(Selector|string|callable $selector, string $class): static
+    {
+        Assert::true(
+            $this->node($selector)->hasClass($class),
+            'Element with selector "{selector}" does not have class "{class}".',
+            ['selector' => $selector, 'class' => $class],
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    public function doesNotHaveClass(Selector|string|callable $selector, string $class): static
+    {
+        if (!$node = $this->dom->find($selector)) {
+            Assert::pass();
+
+            return $this;
+        }
+
+        Assert::false(
+            $node->hasClass($class),
+            'Element with selector "{selector}" has class "{class}" but it should not.',
+            ['selector' => $selector, 'class' => $class],
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
     public function fieldEquals(Selector|string|callable $selector, string $expected): static
     {
         $field = $this->field($selector);
