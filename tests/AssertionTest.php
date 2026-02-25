@@ -126,6 +126,12 @@ final class AssertionTest extends TestCase
     }
 
     #[Test]
+    public function field_equals_for_empty_string(): void
+    {
+        $this->assertion()->fieldEquals('#empty-input', '');
+    }
+
+    #[Test]
     public function field_equals_for_combobox_by_text(): void
     {
         $this->assertion()->fieldEquals('#input4', 'option 1');
@@ -147,6 +153,12 @@ final class AssertionTest extends TestCase
     public function field_selected_for_combobox(): void
     {
         $this->assertion()->fieldSelected('#input4', 'option 1');
+    }
+
+    #[Test]
+    public function field_placeholder_selected_for_combobox(): void
+    {
+        $this->assertion()->fieldSelected('#select-with-empty-value', '');
     }
 
     #[Test]
