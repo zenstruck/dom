@@ -219,6 +219,21 @@ class Node
         return $this->attributes()->get('id');
     }
 
+    final public function attr(string $name): ?string
+    {
+        return $this->attributes()->get($name);
+    }
+
+    final public function data(string $name): ?string
+    {
+        return $this->attributes()->get('data-'.$name);
+    }
+
+    final public function hasClass(string $class): bool
+    {
+        return $this->attributes()->hasClass($class);
+    }
+
     final public function click(): void
     {
         $this->ensureSession()->click($this);

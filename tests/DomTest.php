@@ -80,6 +80,29 @@ class DomTest extends TestCase
     }
 
     #[Test]
+    public function attribute_equals(): void
+    {
+        $this->dom()->assert()
+            ->attributeEquals('meta[name="description"]', 'content', 'meta description')
+            ->attributeEquals('html', 'lang', 'en')
+            ->attributeEquals('body', 'class', 'body-class')
+            ->attributeNotEquals('body', 'class', 'other-class')
+            ->attributeNotEquals('a', 'href', '/page4')
+            ->attributeNotEquals('#foobar', 'class', 'any-class') // passes if element doesn't exist
+        ;
+    }
+
+    #[Test]
+    public function class_assertions(): void
+    {
+        $this->dom()->assert()
+            ->hasClass('body', 'body-class')
+            ->doesNotHaveClass('body', 'other-class')
+            ->doesNotHaveClass('#foobar', 'any-class') // passes if element doesn't exist
+        ;
+    }
+
+    #[Test]
     public function field_equals(): void
     {
         $this->dom()->assert()

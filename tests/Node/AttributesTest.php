@@ -34,6 +34,22 @@ final class AttributesTest extends TestCase
         $this->assertSame($expected, $attributes->classes());
     }
 
+    #[Test]
+    #[DataProvider('provideClassCases')]
+    public function has_class(string $classes, array $expected): void
+    {
+        $element = (new \DOMDocument())->createElement('test');
+        $element->setAttribute('class', $classes);
+
+        $attributes = new Attributes($element);
+
+        foreach ($expected as $class) {
+            $this->assertTrue($attributes->hasClass($class));
+        }
+
+        $this->assertFalse($attributes->hasClass('nonexistent'));
+    }
+
     /**
      * @return iterable<array{0: string, 1: string[]}>
      */
