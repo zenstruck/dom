@@ -128,6 +128,21 @@ class DomTest extends TestCase
     }
 
     #[Test]
+    public function field_state(): void
+    {
+        $this->dom()->assert()
+            ->fieldIsDisabled('disabled_field')
+            ->fieldIsEnabled('input_1')
+            ->fieldIsRequired('required_field')
+            ->fieldIsOptional('input_1')
+            ->fieldIsReadonly('readonly_field')
+            ->fieldIsNotReadonly('input_1')
+            ->fieldIsInert('inert_field')
+            ->fieldIsNotInert('input_1')
+        ;
+    }
+
+    #[Test]
     public function find_or_fail(): void
     {
         $dom = $this->dom();
