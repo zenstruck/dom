@@ -32,6 +32,7 @@ final class Selector implements \Stringable
     private const TYPE_BUTTON = 'button';
     private const TYPE_IMAGE = 'image';
     private const TYPE_XPATH = 'xpath';
+    private const TYPE_TESTID = 'testid';
     private const TYPE_CALLBACK = '(callback)';
     private const SEPARATOR = ':==:';
     private const SEPARATOR_FORMAT = '%s'.self::SEPARATOR.'%s';
@@ -47,6 +48,7 @@ final class Selector implements \Stringable
         self::TYPE_BUTTON,
         self::TYPE_IMAGE,
         self::TYPE_XPATH,
+        self::TYPE_TESTID,
     ];
     private const PRIORITY_MAP = [
         self::TYPE_AUTO => [self::TYPE_CSS, self::TYPE_BUTTON, self::TYPE_LINK, self::TYPE_IMAGE, self::TYPE_ID, self::TYPE_FIELD_FOR_NAME, self::TYPE_FIELD_FOR_LABEL],
@@ -159,6 +161,14 @@ final class Selector implements \Stringable
     }
 
     /**
+     * @param SelectorType $value
+     */
+    public static function testId(self|string|callable $value): self
+    {
+        return self::createForDefault(self::TYPE_TESTID, $value);
+    }
+
+    /**
      * @internal Do not use outside of zenstruck/dom. Subject to removal or signature changes without notice.
      */
     public function filter(Crawler $crawler): Crawler
@@ -202,6 +212,7 @@ final class Selector implements \Stringable
             self::TYPE_FIELD_FOR_NAME => $crawler->filter(\sprintf('input[name="%1$s"],select[name="%1$s"],textarea[name="%1$s"]', $value)),
             self::TYPE_FIELD_FOR_LABEL => self::filterFieldForLabel($crawler, $value),
             self::TYPE_XPATH => $crawler->filterXPath($value),
+            self::TYPE_TESTID => $crawler->filter(\sprintf('[data-testid="%s"]', $value)),
             default => throw new \InvalidArgumentException(\sprintf('Invalid type "%s".', $type)),
         };
     }
