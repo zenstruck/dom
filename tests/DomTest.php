@@ -15,7 +15,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Symfony\Component\Process\Process;
 use Symfony\Component\VarDumper\VarDumper;
 use Zenstruck\Dom;
@@ -25,7 +24,7 @@ use Zenstruck\Dom\Exception\RuntimeException;
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 #[CoversClass(Dom::class)]
-class DomTest extends TestCase
+final class DomTest extends TestCase
 {
     #[Test]
     public function contains_text(): void
@@ -226,10 +225,6 @@ class DomTest extends TestCase
     #[Test]
     public function dump_outputs_document_html(): void
     {
-        if ($this->dom()->crawler() instanceof PantherCrawler) {
-            $this->markTestSkipped('Dump output uses DomCrawler getNode which is not available in WebDriver mode.');
-        }
-
         $output = $this->captureDumpOutput(fn() => $this->dom()->dump());
 
         $this->assertStringContainsString('meta title', $output);
@@ -238,10 +233,6 @@ class DomTest extends TestCase
     #[Test]
     public function dump_with_selector_outputs_node_html(): void
     {
-        if ($this->dom()->crawler() instanceof PantherCrawler) {
-            $this->markTestSkipped('Dump output uses DomCrawler getNode which is not available in WebDriver mode.');
-        }
-
         $output = $this->captureDumpOutput(fn() => $this->dom()->dump('h1'));
 
         $this->assertStringContainsString('h1 title', $output);
@@ -250,10 +241,6 @@ class DomTest extends TestCase
     #[Test]
     public function dd_exits_with_output(): void
     {
-        if ($this->dom()->crawler() instanceof PantherCrawler) {
-            $this->markTestSkipped('DD test uses a subprocess and is not relevant for WebDriver mode.');
-        }
-
         $projectRoot = \dirname(__DIR__);
         $code = 'require "vendor/autoload.php"; $dom = new \\Zenstruck\\Dom(file_get_contents("tests/Fixtures/page.html")); $dom->dd();';
         $process = new Process([\PHP_BINARY, '-r', $code], $projectRoot);
@@ -264,7 +251,7 @@ class DomTest extends TestCase
         $this->assertStringContainsString('meta title', $process->getOutput());
     }
 
-    protected function dom(): Dom
+    private function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/Fixtures/page.html'));
     }
