@@ -12,7 +12,6 @@
 namespace Zenstruck\Dom;
 
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Attributes;
 use Zenstruck\Dom\Node\Form;
@@ -66,10 +65,6 @@ class Node
 
     final public function isVisible(): bool
     {
-        if ($this->crawler instanceof PantherCrawler) {
-            return $this->crawler->isDisplayed();
-        }
-
         if ($this->attributes()->has('hidden')) {
             return false;
         }
@@ -89,7 +84,7 @@ class Node
 
     final public function element(): \DOMElement
     {
-        $element = $this->normalizedCrawler()->getNode(0);
+        $element = $this->crawler->getNode(0);
 
         return $element instanceof \DOMElement ? $element : throw new RuntimeException('Unable to get DOMElement from node.');
     }
@@ -101,26 +96,22 @@ class Node
 
     final public function text(): string
     {
-        if ($this->crawler instanceof PantherCrawler && 'title' === $this->tag()) {
-            return $this->normalizedCrawler()->text();
-        }
-
         return $this->crawler->text();
     }
 
     final public function directText(): string
     {
-        return $this->normalizedCrawler()->innerText();
+        return $this->crawler->innerText();
     }
 
     final public function outerHtml(): string
     {
-        return $this->normalizedCrawler()->outerHtml();
+        return $this->crawler->outerHtml();
     }
 
     final public function innerHtml(): ?string
     {
-        $html = $this->normalizedCrawler()->html();
+        $html = $this->crawler->html();
 
         return '' === $html ? null : $html;
     }
@@ -247,24 +238,5 @@ class Node
     final protected function ensureSession(): Session
     {
         return $this->session ?? throw new RuntimeException('No interactive session available.');
-    }
-
-    private function normalizedCrawler(): Crawler
-    {
-        if (!$this->crawler instanceof PantherCrawler) {
-            return $this->crawler;
-        }
-
-        if (!$element = $this->crawler->getElement(0)) {
-            throw new RuntimeException('Unable to get element from PantherCrawler.');
-        }
-
-        if (!\method_exists($element, 'getDomProperty')) {
-            throw new RuntimeException('Unable to get outerHTML from PantherCrawler.');
-        }
-
-        $html = $element->getDomProperty('outerHTML') ?? throw new RuntimeException('Unable to get outerHTML from PantherCrawler.');
-
-        return (new Crawler($html))->filter($this->tag());
     }
 }

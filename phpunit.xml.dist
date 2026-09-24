@@ -15,10 +15,6 @@
     <testsuites>
         <testsuite name="zenstruck/dom Test Suite">
             <directory>tests</directory>
-            <exclude>tests/Functional</exclude>
-        </testsuite>
-        <testsuite name="Functional">
-            <directory>tests/Functional</directory>
         </testsuite>
     </testsuites>
 

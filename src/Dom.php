@@ -12,7 +12,6 @@
 namespace Zenstruck;
 
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 use Zenstruck\Dom\Assertion;
 use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node;
@@ -44,10 +43,6 @@ final class Dom
      */
     public function find(Selector|string|callable $selector): ?Node
     {
-        if ($this->crawler instanceof PantherCrawler && 'html' === $selector) {
-            return Node::create($this->crawler, $this->session); // todo remove need for this
-        }
-
         return Nodes::create($this->crawler, $this->session)->first($selector);
     }
 
@@ -66,10 +61,6 @@ final class Dom
      */
     public function findAll(Selector|string|callable $selector): Nodes
     {
-        if ($this->crawler instanceof PantherCrawler && 'html' === $selector) {
-            return Nodes::create($this->crawler, $this->session); // todo remove need for this
-        }
-
         return Nodes::create($this->crawler, $this->session)->filter($selector);
     }
 

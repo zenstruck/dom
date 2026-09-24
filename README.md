@@ -305,12 +305,5 @@ interface Session
 ## Testing
 
 ```bash
-# unit tests
 vendor/bin/phpunit
-
-# functional browser tests (requires chromedriver/geckodriver)
-vendor/bin/phpunit --testsuite Functional
-
-# install browser drivers if missing
-vendor/bin/bdi detect drivers
 ```
