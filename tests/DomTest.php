@@ -136,8 +136,6 @@ final class DomTest extends TestCase
             ->fieldIsOptional('input_1')
             ->fieldIsReadonly('readonly_field')
             ->fieldIsNotReadonly('input_1')
-            ->fieldIsInert('inert_field')
-            ->fieldIsNotInert('input_1')
         ;
     }
 

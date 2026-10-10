@@ -379,26 +379,6 @@ final class Assertion
     }
 
     /**
-     * @param SelectorType $selector
-     */
-    public function fieldIsInert(Selector|string|callable $selector): static
-    {
-        Assert::true($this->field($selector)->isInert(), 'Field with selector "{selector}" is not inert.', ['selector' => $selector]);
-
-        return $this;
-    }
-
-    /**
-     * @param SelectorType $selector
-     */
-    public function fieldIsNotInert(Selector|string|callable $selector): static
-    {
-        Assert::false($this->field($selector)->isInert(), 'Field with selector "{selector}" is inert but it should not be.', ['selector' => $selector]);
-
-        return $this;
-    }
-
-    /**
      * @template N as Node
      *
      * @param SelectorType    $selector

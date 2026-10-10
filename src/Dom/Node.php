@@ -82,6 +82,11 @@ class Node
         return true;
     }
 
+    final public function isInert(): bool
+    {
+        return null !== $this->closest('[inert]');
+    }
+
     final public function element(): \DOMElement
     {
         $element = $this->crawler->getNode(0);

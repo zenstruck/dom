@@ -63,11 +63,6 @@ abstract class Field extends Element
         return $this->attributes()->has('readonly');
     }
 
-    final public function isInert(): bool
-    {
-        return $this->attributes()->has('inert');
-    }
-
     public function value(): mixed
     {
         return $this->attributes()->get('value');

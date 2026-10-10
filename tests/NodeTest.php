@@ -410,6 +410,33 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
+    public function is_inert_returns_true_for_inert_attribute(): void
+    {
+        $crawler = (new Crawler('<input inert>'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertTrue($node->isInert());
+    }
+
+    #[Test]
+    public function is_inert_returns_true_for_inert_ancestor(): void
+    {
+        $crawler = (new Crawler('<div inert><form><input></form></div>'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertTrue($node->isInert());
+    }
+
+    #[Test]
+    public function is_inert_returns_false_without_inert_attribute(): void
+    {
+        $crawler = (new Crawler('<div><input></div>'))->filter('input');
+        $node = Node::create($crawler, null);
+
+        $this->assertFalse($node->isInert());
+    }
+
+    #[Test]
     public function is_visible_returns_false_for_input_type_hidden(): void
     {
         $crawler = (new Crawler('<input type="hidden">'))->filter('input');

@@ -378,13 +378,6 @@ final class FormTest extends TestCase
         $this->assertFalse($this->dom()->findOrFail(Selector::field('input_1'))->ensure(Field::class)->isReadonly());
     }
 
-    #[Test]
-    public function is_inert(): void
-    {
-        $this->assertTrue($this->dom()->findOrFail(Selector::field('inert_field'))->ensure(Field::class)->isInert());
-        $this->assertFalse($this->dom()->findOrFail(Selector::field('input_1'))->ensure(Field::class)->isInert());
-    }
-
     // --- Form Attribute Support ---
 
     #[Test]
