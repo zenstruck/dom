@@ -18,7 +18,7 @@ use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Select\Combobox;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Option::class)]
 final class OptionTest extends TestCase
@@ -58,24 +58,11 @@ final class OptionTest extends TestCase
     }
 
     #[Test]
-    public function select_calls_session(): void
-    {
-        $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
-        $option = $dom->findOrFail(Selector::css('#input4 option[value="option 2"]'))->ensure(Option::class);
-
-        $option->select();
-
-        $this->assertCount(1, $session->selected);
-        $this->assertSame('option 2', $session->selected[0]->value());
-    }
-
-    #[Test]
-    public function is_selected_defers_to_the_session(): void
+    public function is_selected_defers_to_the_inspector(): void
     {
         $markup = '<form><select name="s"><option value="a">A</option></select></form>';
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
-        $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
+        $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
     }
 }

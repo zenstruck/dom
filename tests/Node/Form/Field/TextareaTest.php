@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Textarea::class)]
 final class TextareaTest extends TestCase
@@ -32,24 +32,11 @@ final class TextareaTest extends TestCase
     }
 
     #[Test]
-    public function fill_calls_session(): void
-    {
-        $session = new TestSession();
-        $dom = new Dom('<form><textarea name="bio">Initial</textarea></form>', $session);
-        $textarea = $dom->findOrFail(Selector::css('textarea'))->ensure(Textarea::class);
-
-        $textarea->fill('Updated');
-
-        $this->assertCount(1, $session->fills);
-        $this->assertSame('Updated', $session->fills[0][1]);
-    }
-
-    #[Test]
-    public function value_defers_to_the_session(): void
+    public function value_defers_to_the_inspector(): void
     {
         $markup = '<form><textarea name="bio">Initial</textarea></form>';
 
         $this->assertSame('Initial', (new Dom($markup))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
-        $this->assertSame('typed', (new Dom($markup, new TestSession('typed')))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
+        $this->assertSame('typed', (new Dom($markup, new TestInspector('typed')))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
     }
 }

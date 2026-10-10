@@ -27,28 +27,28 @@ class Node
 
     private Attributes $attributes;
 
-    protected function __construct(protected readonly Crawler $crawler, protected readonly ?Session $session)
+    protected function __construct(protected readonly Crawler $crawler, protected readonly ?Inspector $inspector)
     {
     }
 
-    final public static function create(Crawler $crawler, ?Session $session): self
+    final public static function create(Crawler $crawler, ?Inspector $inspector): self
     {
-        $node = new self($crawler, $session);
+        $node = new self($crawler, $inspector);
         $tag = \mb_strtolower($node->tag());
 
         return match (true) {
-            'form' === $tag => new Form($crawler, $session),
-            'label' === $tag => new Form\Label($crawler, $session),
-            'textarea' === $tag => new Form\Field\Textarea($crawler, $session),
-            'input' === $tag && $node->attributes()->is('type', 'checkbox') => new Form\Field\Checkbox($crawler, $session),
-            'input' === $tag && $node->attributes()->is('type', 'radio') => new Form\Field\Radio($crawler, $session),
-            'input' === $tag && $node->attributes()->is('type', 'file') => new Form\Field\File($crawler, $session),
-            'input' === $tag && $node->attributes()->is('type', 'submit', 'button', 'reset', 'image') => new Form\Button($crawler, $session),
-            'button' === $tag => new Form\Button($crawler, $session),
-            'input' === $tag => new Form\Field\Input($crawler, $session),
-            'option' === $tag => new Form\Field\Select\Option($crawler, $session),
-            'select' === $tag && $node->attributes()->has('multiple') => new Form\Field\Select\Multiselect($crawler, $session),
-            'select' === $tag => new Form\Field\Select\Combobox($crawler, $session),
+            'form' === $tag => new Form($crawler, $inspector),
+            'label' === $tag => new Form\Label($crawler, $inspector),
+            'textarea' === $tag => new Form\Field\Textarea($crawler, $inspector),
+            'input' === $tag && $node->attributes()->is('type', 'checkbox') => new Form\Field\Checkbox($crawler, $inspector),
+            'input' === $tag && $node->attributes()->is('type', 'radio') => new Form\Field\Radio($crawler, $inspector),
+            'input' === $tag && $node->attributes()->is('type', 'file') => new Form\Field\File($crawler, $inspector),
+            'input' === $tag && $node->attributes()->is('type', 'submit', 'button', 'reset', 'image') => new Form\Button($crawler, $inspector),
+            'button' === $tag => new Form\Button($crawler, $inspector),
+            'input' === $tag => new Form\Field\Input($crawler, $inspector),
+            'option' === $tag => new Form\Field\Select\Option($crawler, $inspector),
+            'select' === $tag && $node->attributes()->has('multiple') => new Form\Field\Select\Multiselect($crawler, $inspector),
+            'select' === $tag => new Form\Field\Select\Combobox($crawler, $inspector),
             default => $node,
         };
     }
@@ -65,25 +65,7 @@ class Node
 
     final public function isVisible(): bool
     {
-        if ($this->session instanceof RenderedSession) {
-            return $this->session->isVisible($this);
-        }
-
-        if ($this->attributes()->has('hidden')) {
-            return false;
-        }
-
-        if ($this->attributes()->is('type', 'hidden')) {
-            return false;
-        }
-
-        $style = $this->attributes()->get('style') ?? '';
-
-        if (\preg_match('/display\s*:\s*none/i', $style) || \preg_match('/visibility\s*:\s*hidden/i', $style)) {
-            return false;
-        }
-
-        return true;
+        return $this->inspector?->isVisible($this) ?? $this->isVisibleInMarkup();
     }
 
     final public function isInert(): bool
@@ -105,11 +87,7 @@ class Node
 
     final public function text(): string
     {
-        if ($this->session instanceof RenderedSession) {
-            return $this->session->text($this);
-        }
-
-        return $this->crawler->text();
+        return $this->inspector?->text($this) ?? $this->crawler->text();
     }
 
     final public function directText(): string
@@ -131,24 +109,24 @@ class Node
 
     final public function parent(): ?self
     {
-        return Nodes::create($this->crawler->ancestors(), $this->session)->first();
+        return Nodes::create($this->crawler->ancestors(), $this->inspector)->first();
     }
 
     final public function next(): ?self
     {
-        return Nodes::create($this->crawler->nextAll(), $this->session)->first();
+        return Nodes::create($this->crawler->nextAll(), $this->inspector)->first();
     }
 
     final public function previous(): ?self
     {
-        return Nodes::create($this->crawler->previousAll(), $this->session)->first();
+        return Nodes::create($this->crawler->previousAll(), $this->inspector)->first();
     }
 
     final public function closest(string $selector): ?self
     {
         $closest = $this->crawler->closest($selector);
 
-        return $closest ? self::create($closest, $this->session) : null;
+        return $closest ? self::create($closest, $this->inspector) : null;
     }
 
     final public function ancestor(): ?self
@@ -158,7 +136,7 @@ class Node
 
     final public function ancestors(): Nodes
     {
-        return Nodes::create($this->crawler->ancestors(), $this->session);
+        return Nodes::create($this->crawler->ancestors(), $this->inspector);
     }
 
     final public function root(): self
@@ -168,12 +146,12 @@ class Node
 
     final public function siblings(): Nodes
     {
-        return Nodes::create($this->crawler->siblings(), $this->session);
+        return Nodes::create($this->crawler->siblings(), $this->inspector);
     }
 
     final public function children(): Nodes
     {
-        return Nodes::create($this->crawler->children(), $this->session);
+        return Nodes::create($this->crawler->children(), $this->inspector);
     }
 
     /**
@@ -189,7 +167,7 @@ class Node
      */
     final public function descendants(Selector|string|callable|null $selector = null): Nodes
     {
-        return Nodes::create($this->crawler, $this->session)->filter($selector ?? Selector::xpath('descendant::*'));
+        return Nodes::create($this->crawler, $this->inspector)->filter($selector ?? Selector::xpath('descendant::*'));
     }
 
     /**
@@ -238,42 +216,6 @@ class Node
         return $this->attributes()->hasClass($class);
     }
 
-    final public function click(Modifier|string ...$modifiers): void
-    {
-        if (!$modifiers) {
-            $this->ensureSession()->click($this);
-
-            return;
-        }
-
-        $this->ensureRenderedSession()->click($this, ...self::normalizeModifiers($modifiers));
-    }
-
-    final public function doubleClick(Modifier|string ...$modifiers): void
-    {
-        $this->ensureRenderedSession()->doubleClick($this, ...self::normalizeModifiers($modifiers));
-    }
-
-    final public function rightClick(Modifier|string ...$modifiers): void
-    {
-        $this->ensureRenderedSession()->rightClick($this, ...self::normalizeModifiers($modifiers));
-    }
-
-    final public function hover(Modifier|string ...$modifiers): void
-    {
-        $this->ensureRenderedSession()->hover($this, ...self::normalizeModifiers($modifiers));
-    }
-
-    final public function focus(): void
-    {
-        $this->ensureRenderedSession()->focus($this);
-    }
-
-    final public function blur(): void
-    {
-        $this->ensureRenderedSession()->blur($this);
-    }
-
     /**
      * @codeCoverageIgnore
      */
@@ -294,27 +236,22 @@ class Node
         exit(1);
     }
 
-    final protected function ensureSession(): Session
+    private function isVisibleInMarkup(): bool
     {
-        return $this->session ?? throw new RuntimeException('No interactive session available.');
-    }
-
-    final protected function ensureRenderedSession(): RenderedSession
-    {
-        if ($this->session instanceof RenderedSession) {
-            return $this->session;
+        if ($this->attributes()->has('hidden')) {
+            return false;
         }
 
-        throw new RuntimeException('No rendered session available.');
-    }
+        if ($this->attributes()->is('type', 'hidden')) {
+            return false;
+        }
 
-    /**
-     * @param array<Modifier|string> $modifiers
-     *
-     * @return list<Modifier>
-     */
-    private static function normalizeModifiers(array $modifiers): array
-    {
-        return \array_values(\array_map(Modifier::normalize(...), $modifiers));
+        $style = $this->attributes()->get('style') ?? '';
+
+        if (\preg_match('/display\s*:\s*none/i', $style) || \preg_match('/visibility\s*:\s*hidden/i', $style)) {
+            return false;
+        }
+
+        return true;
     }
 }

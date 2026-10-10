@@ -22,11 +22,6 @@ final class Textarea extends Field
 
     public function value(): string
     {
-        return $this->session?->value($this) ?? $this->directText();
-    }
-
-    public function fill(string $value): void
-    {
-        $this->ensureSession()->fill($this, $value);
+        return $this->inspector?->value($this) ?? $this->directText();
     }
 }

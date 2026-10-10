@@ -15,47 +15,20 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
-use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Form\Field\Radio;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Radio::class)]
 final class RadioTest extends TestCase
 {
     #[Test]
-    public function select_without_value_uses_self(): void
+    public function with_value_finds_the_matching_radio_in_the_group(): void
     {
-        $session = new TestSession();
-        $radio = $this->dom($session)->findOrFail(Selector::css('#radio1'))->ensure(Radio::class);
+        $radio = $this->dom()->findOrFail(Selector::css('#radio1'))->ensure(Radio::class);
 
-        $radio->select();
-
-        $this->assertCount(1, $session->selected);
-        $this->assertSame('option 1', $session->selected[0]->value());
-    }
-
-    #[Test]
-    public function select_with_value_uses_matching_radio(): void
-    {
-        $session = new TestSession();
-        $radio = $this->dom($session)->findOrFail(Selector::css('#radio1'))->ensure(Radio::class);
-
-        $radio->select('option 3');
-
-        $this->assertCount(1, $session->selected);
-        $this->assertSame('option 3', $session->selected[0]->value());
-    }
-
-    #[Test]
-    public function select_with_value_throws_when_missing(): void
-    {
-        $radio = $this->dom(new TestSession())->findOrFail(Selector::css('#radio1'))->ensure(Radio::class);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Could not find radio with value "missing".');
-
-        $radio->select('missing');
+        $this->assertSame('option 3', $radio->withValue('option 3')?->value());
+        $this->assertNull($radio->withValue('missing'));
     }
 
     #[Test]
@@ -69,16 +42,16 @@ final class RadioTest extends TestCase
     }
 
     #[Test]
-    public function is_selected_defers_to_the_session(): void
+    public function is_selected_defers_to_the_inspector(): void
     {
         $markup = '<form><input type="radio" name="choice" value="a"></form>';
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
-        $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
+        $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
     }
 
-    private function dom(?TestSession $session = null): Dom
+    private function dom(): Dom
     {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
     }
 }

@@ -22,13 +22,13 @@ use Symfony\Component\DomCrawler\Crawler;
  */
 final class Nodes implements \IteratorAggregate, \Countable
 {
-    private function __construct(private Crawler $crawler, private ?Session $session)
+    private function __construct(private Crawler $crawler, private ?Inspector $inspector)
     {
     }
 
-    public static function create(Crawler $crawler, ?Session $session): self
+    public static function create(Crawler $crawler, ?Inspector $inspector): self
     {
-        return new self($crawler, $session);
+        return new self($crawler, $inspector);
     }
 
     public function crawler(): Crawler
@@ -45,12 +45,12 @@ final class Nodes implements \IteratorAggregate, \Countable
             return $this->filter($selector)->first();
         }
 
-        return $this->count() ? Node::create($this->crawler->first(), $this->session) : null;
+        return $this->count() ? Node::create($this->crawler->first(), $this->inspector) : null;
     }
 
     public function last(): ?Node
     {
-        return $this->count() ? Node::create($this->crawler->last(), $this->session) : null;
+        return $this->count() ? Node::create($this->crawler->last(), $this->inspector) : null;
     }
 
     /**
@@ -58,7 +58,7 @@ final class Nodes implements \IteratorAggregate, \Countable
      */
     public function filter(Selector|string|callable $selector): self
     {
-        return self::create(Selector::wrap($selector)->filter($this->crawler), $this->session);
+        return self::create(Selector::wrap($selector)->filter($this->crawler), $this->inspector);
     }
 
     public function merge(self $other): self
@@ -72,7 +72,7 @@ final class Nodes implements \IteratorAggregate, \Countable
         $crawler = new Crawler();
         $crawler->add($nodes);
 
-        return new self($crawler, $this->session);
+        return new self($crawler, $this->inspector);
     }
 
     /**
@@ -81,8 +81,8 @@ final class Nodes implements \IteratorAggregate, \Countable
     public function reduce(callable $callback): self
     {
         return new self($this->crawler->reduce(function(Crawler $nodeCrawler, int $i) use ($callback) {
-            return $callback(Node::create($nodeCrawler, $this->session), $i);
-        }), $this->session);
+            return $callback(Node::create($nodeCrawler, $this->inspector), $i);
+        }), $this->inspector);
     }
 
     /**
@@ -111,7 +111,7 @@ final class Nodes implements \IteratorAggregate, \Countable
     public function getIterator(): \Traversable
     {
         for ($i = 0; $i < $this->count(); ++$i) {
-            yield Node::create($this->crawler->eq($i), $this->session);
+            yield Node::create($this->crawler->eq($i), $this->inspector);
         }
     }
 

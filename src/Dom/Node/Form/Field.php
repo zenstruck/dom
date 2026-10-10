@@ -42,10 +42,10 @@ abstract class Field extends Element
     public function collection(): Nodes
     {
         if (!$name = $this->name()) {
-            return Nodes::create(new Crawler(), $this->session);
+            return Nodes::create(new Crawler(), $this->inspector);
         }
 
-        return $this->form()?->descendants(Selector::field($name)) ?? Nodes::create(new Crawler(), $this->session);
+        return $this->form()?->descendants(Selector::field($name)) ?? Nodes::create(new Crawler(), $this->inspector);
     }
 
     final public function isDisabled(): bool

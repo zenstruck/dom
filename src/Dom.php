@@ -17,7 +17,7 @@ use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Nodes;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Session;
+use Zenstruck\Dom\Inspector;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -29,7 +29,7 @@ final class Dom
     private Crawler $crawler;
     private Assertion $assertion;
 
-    public function __construct(string|Crawler $crawler, private ?Session $session = null)
+    public function __construct(string|Crawler $crawler, private ?Inspector $inspector = null)
     {
         if (\is_string($crawler)) {
             $crawler = new Crawler($crawler);
@@ -43,7 +43,7 @@ final class Dom
      */
     public function find(Selector|string|callable $selector): ?Node
     {
-        return Nodes::create($this->crawler, $this->session)->first($selector);
+        return Nodes::create($this->crawler, $this->inspector)->first($selector);
     }
 
     /**
@@ -61,7 +61,7 @@ final class Dom
      */
     public function findAll(Selector|string|callable $selector): Nodes
     {
-        return Nodes::create($this->crawler, $this->session)->filter($selector);
+        return Nodes::create($this->crawler, $this->inspector)->filter($selector);
     }
 
     public function crawler(): Crawler

@@ -22,7 +22,7 @@ final class Checkbox extends Field
 
     public function isChecked(): bool
     {
-        return $this->session?->isSelected($this) ?? $this->attributes()->has('checked');
+        return $this->inspector?->isSelected($this) ?? $this->attributes()->has('checked');
     }
 
     /**
@@ -31,15 +31,5 @@ final class Checkbox extends Field
     public function value(): ?string
     {
         return $this->isChecked() ? 'on' : null;
-    }
-
-    public function check(): void
-    {
-        $this->ensureSession()->select($this);
-    }
-
-    public function uncheck(): void
-    {
-        $this->ensureSession()->unselect($this);
     }
 }

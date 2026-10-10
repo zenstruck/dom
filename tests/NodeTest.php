@@ -12,13 +12,11 @@
 namespace Zenstruck\Dom\Tests;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Exception\RuntimeException;
-use Zenstruck\Dom\Modifier;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form;
 use Zenstruck\Dom\Node\Form\Button;
@@ -31,8 +29,7 @@ use Zenstruck\Dom\Node\Form\Field\Select\Multiselect;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 use Zenstruck\Dom\Node\Form\Label;
-use Zenstruck\Dom\Tests\Support\TestRenderedSession;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Node::class)]
 final class NodeTest extends TestCase
@@ -204,18 +201,6 @@ final class NodeTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $node->ensure(Checkbox::class);
-    }
-
-    #[Test]
-    public function ensure_session_throws_when_no_session(): void
-    {
-        $crawler = (new Crawler('<div>content</div>'))->filter('div');
-        $node = Node::create($crawler, null);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No interactive session available.');
-
-        $node->click();
     }
 
     #[Test]
@@ -486,81 +471,21 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
-    public function is_visible_defers_to_a_rendered_session(): void
+    public function is_visible_defers_to_the_inspector(): void
     {
-        $crawler = (new Crawler('<div>content</div>'))->filter('div');
+        $crawler = (new Crawler('<div hidden>content</div>'))->filter('div');
 
-        $this->assertTrue(Node::create($crawler, new TestRenderedSession(visible: true))->isVisible());
-        $this->assertFalse(Node::create($crawler, new TestRenderedSession(visible: false))->isVisible());
+        $this->assertFalse(Node::create($crawler, new TestInspector())->isVisible());
+        $this->assertTrue(Node::create($crawler, new TestInspector(visible: true))->isVisible());
     }
 
     #[Test]
-    public function text_defers_to_a_rendered_session(): void
+    public function text_defers_to_the_inspector(): void
     {
         $crawler = (new Crawler('<div>markup text</div>'))->filter('div');
 
-        $this->assertSame('markup text', Node::create($crawler, new TestSession())->text());
-        $this->assertSame('rendered text', Node::create($crawler, new TestRenderedSession())->text());
-    }
-
-    #[Test]
-    public function rendered_clicks_defer_to_a_rendered_session(): void
-    {
-        $crawler = (new Crawler('<div>content</div>'))->filter('div');
-        $session = new TestRenderedSession();
-        $node = Node::create($crawler, $session);
-
-        $node->click();
-        $node->click('shift', Modifier::ControlOrMeta);
-        $node->doubleClick();
-        $node->rightClick('alt');
-
-        $this->assertSame([$node], $session->clicked);
-        $this->assertSame([[$node, [Modifier::Shift, Modifier::ControlOrMeta]]], $session->modifiedClicks);
-        $this->assertSame([[$node, []]], $session->doubleClicked);
-        $this->assertSame([[$node, [Modifier::Alt]]], $session->rightClicked);
-    }
-
-    #[Test]
-    public function hover_focus_and_blur_defer_to_a_rendered_session(): void
-    {
-        $crawler = (new Crawler('<input>'))->filter('input');
-        $session = new TestRenderedSession();
-        $node = Node::create($crawler, $session);
-
-        $node->hover();
-        $node->hover('alt');
-        $node->focus();
-        $node->blur();
-
-        $this->assertSame([[$node, []], [$node, [Modifier::Alt]]], $session->hovered);
-        $this->assertSame([$node], $session->focused);
-        $this->assertSame([$node], $session->blurred);
-    }
-
-    #[Test]
-    #[DataProvider('renderedGestures')]
-    public function rendered_gestures_throw_without_a_rendered_session(callable $gesture): void
-    {
-        $crawler = (new Crawler('<div>content</div>'))->filter('div');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No rendered session available.');
-
-        $gesture(Node::create($crawler, new TestSession()));
-    }
-
-    /**
-     * @return iterable<string, array{callable(Node):void}>
-     */
-    public static function renderedGestures(): iterable
-    {
-        yield 'modified click' => [static fn(Node $node) => $node->click(Modifier::Shift)];
-        yield 'double click' => [static fn(Node $node) => $node->doubleClick()];
-        yield 'right click' => [static fn(Node $node) => $node->rightClick()];
-        yield 'hover' => [static fn(Node $node) => $node->hover()];
-        yield 'focus' => [static fn(Node $node) => $node->focus()];
-        yield 'blur' => [static fn(Node $node) => $node->blur()];
+        $this->assertSame('markup text', Node::create($crawler, new TestInspector())->text());
+        $this->assertSame('rendered text', Node::create($crawler, new TestInspector(text: 'rendered text'))->text());
     }
 
     #[Test]

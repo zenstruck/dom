@@ -143,17 +143,6 @@ $node->attr('title');         // attribute value or null
 $node->data('user-id');       // data-* attribute value or null (data-user-id)
 $node->hasClass('active');    // has class
 
-// INTERACTION
-$node->click();                             // requires Session
-$node->click(Modifier::Shift);              // requires RenderedSession
-$node->click('shift', 'alt');               // modifiers by name, in any letter case
-$node->doubleClick();                       // requires RenderedSession
-$node->rightClick(Modifier::ControlOrMeta); // Cmd on macOS, Ctrl elsewhere
-$node->hover();                             // requires RenderedSession
-$node->hover(Modifier::Alt);                // hold modifier keys while hovering
-$node->focus();                             // requires RenderedSession
-$node->blur();                              // requires RenderedSession
-
 // TYPE GUARDS
 $node->is(Checkbox::class);            // true/false
 $node->ensure(Checkbox::class);        // returns typed node or throws
@@ -190,25 +179,21 @@ Nodes are automatically resolved to their specific form element type:
 $input = $dom->findOrFail(Selector::field('email'))->ensure(Input::class);
 $input->value();              // current value
 $input->type();               // "text", "email", "password", etc.
-$input->fill('new value');    // requires Session
 
 // TEXTAREA
 $textarea = $dom->findOrFail(Selector::field('bio'))->ensure(Textarea::class);
 $textarea->value();
-$textarea->fill('new text');  // requires Session
 
 // CHECKBOX
 $checkbox = $dom->findOrFail(Selector::field('terms'))->ensure(Checkbox::class);
 $checkbox->isChecked();
-$checkbox->check();           // requires Session
-$checkbox->uncheck();         // requires Session
 
 // RADIO
 $radio = $dom->findOrFail(Selector::field('gender'))->ensure(Radio::class);
 $radio->isSelected();
 $radio->selected();           // the selected Radio node
 $radio->selectedValue();
-$radio->select();             // requires Session
+$radio->withValue('female');  // the Radio in the same group with this value, or null
 
 // COMBOBOX (single select)
 $select = $dom->findOrFail(Selector::field('country'))->ensure(Combobox::class);
@@ -216,20 +201,17 @@ $select->selectedOption();    // Option node
 $select->selectedValue();
 $select->selectedText();
 $select->availableOptions();  // all Option nodes
-$select->select('Canada');    // requires Session
+$select->optionMatching('Canada'); // Option by value or text, or null
 
 // MULTISELECT
 $multi = $dom->findOrFail(Selector::field('roles'))->ensure(Multiselect::class);
 $multi->selectedOptions();    // array of Option nodes
 $multi->selectedValues();
 $multi->selectedTexts();
-$multi->select(['Admin', 'Editor']); // requires Session
-$multi->deselectAll();        // requires Session
 
 // FILE
 $file = $dom->findOrFail(Selector::field('photo'))->ensure(File::class);
 $file->isMultiple();
-$file->attach('/path/to/file.jpg'); // requires Session
 
 // BUTTON
 $button = $dom->findOrFail(Selector::button('Submit'))->ensure(Button::class);
@@ -302,56 +284,6 @@ $dom->assert()
 ;
 ```
 
-## Session Interface
-
-The `Session` interface enables interactive behavior. When provided to the `Dom` constructor,
-form elements can perform actions (clicking, filling, selecting):
-
-```php
-interface Session
-{
-    public function click(Node $node): void;
-    public function select(Checkbox|Radio|Option $node): void;
-    public function unselect(Checkbox|Multiselect $node): void;
-    public function attach(File $node, array $filenames): void;
-    public function fill(Input|Textarea $node, string $value): void;
-
-    public function value(Input|Textarea $node): ?string;
-    public function isSelected(Checkbox|Radio|Option $node): bool;
-}
-```
-
-The last two read back what the first five change. Typing and clicking update DOM properties, which
-never appear in the markup, so `Input::value()`, `Textarea::value()`, `Checkbox::isChecked()`,
-`Radio::isSelected()` and `Option::isSelected()` ask the session first and fall back to the markup
-when there is none.
-
-A session driving a real browser can also implement `RenderedSession`, which answers from what the
-browser renders and performs the gestures only a browser can:
-
-```php
-interface RenderedSession extends Session
-{
-    public function text(Node $node): string;
-    public function isVisible(Node $node): bool;
-
-    public function click(Node $node, Modifier ...$modifiers): void;
-    public function doubleClick(Node $node, Modifier ...$modifiers): void;
-    public function rightClick(Node $node, Modifier ...$modifiers): void;
-    public function hover(Node $node, Modifier ...$modifiers): void;
-    public function focus(Node $node): void;
-    public function blur(Node $node): void;
-}
-```
-
-`Node::text()` and `Node::isVisible()` defer to it when available. `Node::doubleClick()`,
-`Node::rightClick()`, `Node::hover()`, `Node::focus()`, `Node::blur()` and a `Node::click()` with
-modifiers require it, and throw without one.
-
-> [!TIP]
-> Both interfaces are implemented by [zenstruck/browser](https://github.com/zenstruck/browser),
-> allowing the same DOM API to drive real browser interactions.
-
 ## Known Limitations
 
 > [!NOTE]
@@ -361,8 +293,7 @@ modifiers require it, and throw without one.
 > [!NOTE]
 > **`isVisible()` performs basic checks only.** It detects `hidden` attributes, `type="hidden"`
 > inputs, and inline `display:none`/`visibility:hidden` styles. It does not evaluate CSS
-> stylesheets or inherited styles. Provide a [`RenderedSession`](#session-interface) to have a real
-> browser answer instead.
+> stylesheets or inherited styles.
 
 ## Testing
 

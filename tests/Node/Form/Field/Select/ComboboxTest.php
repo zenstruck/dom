@@ -15,11 +15,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
-use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Form\Field\Select\Combobox;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
 
 #[CoversClass(Combobox::class)]
 final class ComboboxTest extends TestCase
@@ -37,30 +35,6 @@ final class ComboboxTest extends TestCase
         $fallback = $dom->findOrFail(Selector::css('#input11'))->ensure(Combobox::class);
         $this->assertSame('option 1', $fallback->selectedValue());
         $this->assertSame('Some value', $fallback->selectedText());
-    }
-
-    #[Test]
-    public function select_calls_session(): void
-    {
-        $session = new TestSession();
-        $dom = new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
-        $combobox = $dom->findOrFail(Selector::css('#input4'))->ensure(Combobox::class);
-
-        $combobox->select('Another');
-
-        $this->assertCount(1, $session->selected);
-        $this->assertSame('option 2', $session->selected[0]->value());
-    }
-
-    #[Test]
-    public function select_throws_when_missing(): void
-    {
-        $combobox = $this->dom()->findOrFail(Selector::css('#input4'))->ensure(Combobox::class);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Could not find option with value/text "missing".');
-
-        $combobox->select('missing');
     }
 
     private function dom(): Dom
