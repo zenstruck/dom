@@ -14,10 +14,10 @@ namespace Zenstruck;
 use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom\Assertion;
 use Zenstruck\Dom\Exception\RuntimeException;
+use Zenstruck\Dom\Inspector;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Nodes;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Inspector;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
