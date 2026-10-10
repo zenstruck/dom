@@ -40,6 +40,6 @@ enum Modifier: string
         $values = \array_map(static fn(self $case) => $case->value, self::cases());
         $cases = \array_combine(\array_map('strtolower', $values), self::cases());
 
-        return $cases[\strtolower($modifier)] ?? throw new \InvalidArgumentException(\sprintf('Invalid modifier "%s", expected one of "%s".', $modifier, \implode('", "', $values)));
+        return $cases[\mb_strtolower($modifier)] ?? throw new \InvalidArgumentException(\sprintf('Invalid modifier "%s", expected one of "%s".', $modifier, \implode('", "', $values)));
     }
 }
