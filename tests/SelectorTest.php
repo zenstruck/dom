@@ -689,6 +689,42 @@ final class SelectorTest extends TestCase
         $this->assertNull($dom->find(Selector::fieldForLabel('email')));
     }
 
+    #[Test]
+    #[DataProvider('accessibleNames')]
+    public function field_for_label_matches_the_accessible_name(string $html, string $search): void
+    {
+        $this->assertSame('target', (new Dom($html))->find(Selector::fieldForLabel($search))?->attr('name'));
+    }
+
+    public static function accessibleNames(): iterable
+    {
+        yield 'aria-label' => ['<input name="target" aria-label="Search">', 'search'];
+        yield 'aria-label partial' => ['<input name="target" aria-label="Search the site">', 'search'];
+        yield 'aria-labelledby' => ['<h2 id="heading">Billing address</h2><input name="target" aria-labelledby="heading">', 'Billing address'];
+        yield 'aria-labelledby with several ids' => ['<span id="a">Street</span><span id="b">Line 2</span><input name="target" aria-labelledby="a b">', 'line 2'];
+        yield 'placeholder' => ['<input name="target" placeholder="you@example.com">', 'you@example.com'];
+        yield 'textarea placeholder' => ['<textarea name="target" placeholder="Comment"></textarea>', 'comment'];
+        yield 'select aria-label' => ['<select name="target" aria-label="Country"></select>', 'country'];
+        yield 'exact placeholder beats partial label' => ['<label>Email address <input name="other"></label><input name="target" placeholder="Email">', 'email'];
+        yield 'label beats placeholder' => ['<input name="other" placeholder="Email"><label>Email <input name="target"></label>', 'email'];
+    }
+
+    #[Test]
+    public function aria_labelledby_ignores_elements_no_field_references(): void
+    {
+        $dom = new Dom('<h2 id="heading">Search</h2><input name="target" placeholder="Search">');
+
+        $this->assertSame('target', $dom->find(Selector::fieldForLabel('Search'))?->attr('name'));
+    }
+
+    #[Test]
+    public function field_selector_falls_back_to_the_accessible_name(): void
+    {
+        $dom = new Dom('<form><input name="q" placeholder="Search"></form>');
+
+        $this->assertSame('q', $dom->find(Selector::field('Search'))?->attr('name'));
+    }
+
     private function createCrawler(): Crawler
     {
         return new Crawler(\file_get_contents(__DIR__.'/Fixtures/page.html'));

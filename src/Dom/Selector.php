@@ -36,6 +36,7 @@ final class Selector implements \Stringable
     private const TYPE_CALLBACK = '(callback)';
     private const SEPARATOR = ':==:';
     private const SEPARATOR_FORMAT = '%s'.self::SEPARATOR.'%s';
+    private const XPATH_FIELD = '*[self::input or self::select or self::textarea]';
     private const VALID_TYPES = [
         self::TYPE_AUTO,
         self::TYPE_CSS,
@@ -216,7 +217,7 @@ final class Selector implements \Stringable
             self::TYPE_LINK => self::filterLink($crawler, $value),
             self::TYPE_BUTTON => $crawler->selectButton($value),
             self::TYPE_IMAGE => $crawler->selectImage($value),
-            self::TYPE_FIELD_FOR_NAME => $crawler->filterXPath(\sprintf('descendant-or-self::*[(self::input or self::select or self::textarea) and @name = %s]', self::xpathQuote($value))),
+            self::TYPE_FIELD_FOR_NAME => $crawler->filterXPath(\sprintf('descendant-or-self::%s[@name = %s]', self::XPATH_FIELD, self::xpathQuote($value))),
             self::TYPE_FIELD_FOR_LABEL => self::filterFieldForLabel($crawler, $value),
             self::TYPE_XPATH => $crawler->filterXPath($value),
             self::TYPE_TESTID => $crawler->filterXPath(\sprintf('descendant-or-self::*[@data-testid = %s]', self::xpathQuote($value))),
@@ -231,32 +232,62 @@ final class Selector implements \Stringable
         }
 
         // try with partial link text
-        if (\count($link = self::filterByType($crawler, self::TYPE_XPATH, self::xpathContains('a', $value)))) {
+        if (\count($link = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, exact: false)))) {
             return $link;
         }
 
         // try with title tag
-        return self::filterByType($crawler, self::TYPE_XPATH, self::xpathContains('a', $value, 'title'));
+        return self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, exact: false, attribute: 'title'));
     }
 
+    /**
+     * Matches the field's accessible name: a <label>, aria-labelledby, aria-label or placeholder.
+     */
     private static function filterFieldForLabel(Crawler $crawler, string $value): Crawler
     {
-        // find exact label match
-        $label = self::filterByType($crawler, self::TYPE_XPATH, self::xpathEquals('label', $value));
-
-        if (!\count($label)) {
-            // find partial label match
-            $label = self::filterByType($crawler, self::TYPE_XPATH, self::xpathContains('label', $value));
-        }
-
-        // the first label may not point at a field (eg a label for a custom widget)
-        foreach ($label as $element) {
-            if (\count($field = self::fieldForLabelElement($crawler, new Crawler($element, $crawler->getUri(), $crawler->getBaseHref())))) {
+        // an exact match from any source beats a partial one
+        foreach ([true, false] as $exact) {
+            if (\count($field = self::filterFieldLabelledBy($crawler, $value, $exact))) {
                 return $field;
             }
         }
 
         return new Crawler();
+    }
+
+    private static function filterFieldLabelledBy(Crawler $crawler, string $value, bool $exact): Crawler
+    {
+        // the first label may not point at a field (eg a label for a custom widget)
+        foreach (self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('label', $value, $exact)) as $label) {
+            if (\count($field = self::fieldForLabelElement($crawler, new Crawler($label, $crawler->getUri(), $crawler->getBaseHref())))) {
+                return $field;
+            }
+        }
+
+        foreach (self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('*[@id]', $value, $exact)) as $labelling) {
+            if (\count($field = self::fieldLabelledByElement($crawler, $labelling))) {
+                return $field;
+            }
+        }
+
+        if (\count($field = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching(self::XPATH_FIELD, $value, $exact, 'aria-label')))) {
+            return $field;
+        }
+
+        return self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching(self::XPATH_FIELD, $value, $exact, 'placeholder'));
+    }
+
+    private static function fieldLabelledByElement(Crawler $crawler, \DOMNode $labelling): Crawler
+    {
+        if (!$labelling instanceof \DOMElement) {
+            return new Crawler();
+        }
+
+        return self::filterByType($crawler, self::TYPE_XPATH, \sprintf(
+            'descendant-or-self::%s[contains(concat(" ", normalize-space(@aria-labelledby), " "), %s)]',
+            self::XPATH_FIELD,
+            self::xpathQuote(' '.$labelling->getAttribute('id').' '),
+        ));
     }
 
     private static function fieldForLabelElement(Crawler $crawler, Crawler $label): Crawler
@@ -294,18 +325,12 @@ final class Selector implements \Stringable
         return new self($parts[0], $parts[1]);
     }
 
-    private static function xpathEquals(string $element, string $value, ?string $attribute = null): string
+    private static function xpathMatching(string $element, string $value, bool $exact, ?string $attribute = null): string
     {
         $value = \mb_strtolower($value);
+        $format = $exact ? 'descendant-or-self::%s[%s = %s]' : 'descendant-or-self::%s[contains(%s, %s)]';
 
-        return \sprintf('descendant-or-self::%s[%s = %s]', $element, self::xpathNormalize($attribute, $value), self::xpathQuote($value));
-    }
-
-    private static function xpathContains(string $element, string $value, ?string $attribute = null): string
-    {
-        $value = \mb_strtolower($value);
-
-        return \sprintf('descendant-or-self::%s[contains(%s, %s)]', $element, self::xpathNormalize($attribute, $value), self::xpathQuote($value));
+        return \sprintf($format, $element, self::xpathNormalize($attribute, $value), self::xpathQuote($value));
     }
 
     private static function xpathQuote(string $value): string

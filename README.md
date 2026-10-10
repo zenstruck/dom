@@ -78,7 +78,7 @@ $dom->find('Click here');           // 3. Link text/title
 $dom->find('Logo');                 // 4. Image alt text
 $dom->find('main-content');         // 5. Element ID
 $dom->find('email');                // 6. Field name attribute
-$dom->find('Email Address');        // 7. Field label text
+$dom->find('Email Address');        // 7. Field label, aria-label or placeholder
 
 // EXPLICIT SELECTORS (force a specific type)
 $dom->find(Selector::css('.my-class'));
@@ -90,7 +90,7 @@ $dom->find(Selector::image('Logo'));
 $dom->find(Selector::testId('checkout'));          // by data-testid attribute
 $dom->find(Selector::field('email'));              // by name or label
 $dom->find(Selector::fieldForName('email'));       // by name only
-$dom->find(Selector::fieldForLabel('Email'));      // by label only
+$dom->find(Selector::fieldForLabel('Email'));      // by label, aria-labelledby, aria-label or placeholder
 $dom->find(Selector::clickable('Submit'));         // buttons first, then links
 
 // SEPARATOR SYNTAX (inline type forcing)
