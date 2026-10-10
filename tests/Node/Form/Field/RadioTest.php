@@ -57,4 +57,24 @@ final class RadioTest extends TestCase
 
         $this->assertSame('on', $dom->findOrFail(Selector::css('input'))->ensure(Radio::class)->value());
     }
+
+    #[Test]
+    public function radios_without_a_form_are_grouped_across_the_document(): void
+    {
+        $dom = new Dom('<div><input type="radio" name="g" value="a"></div><div><input type="radio" name="g" value="b" checked></div><form><input type="radio" name="g" value="in-form"></form><input type="radio" name="g" value="missing-owner" form="nope">');
+        $radio = $dom->findOrFail(Selector::css('input[value="a"]'))->ensure(Radio::class);
+
+        $this->assertSame(['a', 'b', 'missing-owner'], $radio->collection()->map(static fn(Radio $radio) => $radio->value()));
+        $this->assertSame('b', $radio->selectedValue());
+    }
+
+    #[Test]
+    public function radios_in_a_form_are_not_grouped_with_those_outside(): void
+    {
+        $dom = new Dom('<input type="radio" name="g" value="outside" checked><form><input type="radio" name="g" value="inside"></form>');
+        $radio = $dom->findOrFail(Selector::css('input[value="inside"]'))->ensure(Radio::class);
+
+        $this->assertSame(['inside'], $radio->collection()->map(static fn(Radio $radio) => $radio->value()));
+        $this->assertNull($radio->selectedValue());
+    }
 }
