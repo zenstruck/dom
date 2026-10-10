@@ -85,9 +85,9 @@ final class DomTest extends TestCase
             ->attributeEquals('meta[name="description"]', 'content', 'meta description')
             ->attributeEquals('html', 'lang', 'en')
             ->attributeEquals('body', 'class', 'body-class')
-            ->attributeNotEquals('body', 'class', 'other-class')
-            ->attributeNotEquals('a', 'href', '/page4')
-            ->attributeNotEquals('#foobar', 'class', 'any-class') // passes if element doesn't exist
+            ->attributeDoesNotEqual('body', 'class', 'other-class')
+            ->attributeDoesNotEqual('a', 'href', '/page4')
+            ->attributeDoesNotEqual('#foobar', 'class', 'any-class') // passes if element doesn't exist
         ;
     }
 

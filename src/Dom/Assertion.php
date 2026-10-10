@@ -159,8 +159,6 @@ final class Assertion
      */
     public function attributeEquals(Selector|string|callable $selector, string $attribute, string $expected): static
     {
-        $this->hasElement($selector);
-
         $value = $this->node($selector)->attributes()->get($attribute);
 
         Assert::that($value)
@@ -173,7 +171,7 @@ final class Assertion
     /**
      * @param SelectorType $selector
      */
-    public function attributeNotEquals(Selector|string|callable $selector, string $attribute, string $expected): static
+    public function attributeDoesNotEqual(Selector|string|callable $selector, string $attribute, string $expected): static
     {
         $value = $this->dom->find($selector)?->attributes()->get($attribute);
 
