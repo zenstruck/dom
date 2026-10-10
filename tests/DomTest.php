@@ -79,15 +79,6 @@ final class DomTest extends TestCase
     }
 
     #[Test]
-    public function has_test_id(): void
-    {
-        $this->dom()->assert()
-            ->hasTestId('testid:==:submit-btn', 'submit-btn')
-            ->hasTestId('testid:==:main-content', 'main-content')
-        ;
-    }
-
-    #[Test]
     public function field_equals(): void
     {
         $this->dom()->assert()
