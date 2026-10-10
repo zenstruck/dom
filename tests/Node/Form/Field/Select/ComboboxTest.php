@@ -18,6 +18,7 @@ use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Select\Combobox;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Selector;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Combobox::class)]
 final class ComboboxTest extends TestCase
@@ -59,6 +60,25 @@ final class ComboboxTest extends TestCase
         $dom = new Dom('<select id="s" size="3"><option value="a">A</option></select>');
 
         $this->assertNull($dom->findOrFail(Selector::css('#s'))->ensure(Combobox::class)->selectedValue());
+    }
+
+    #[Test]
+    public function selected_option_uses_the_inspector_indexes(): void
+    {
+        $markup = '<select id="s"><optgroup label="g"><option value="a">A</option></optgroup><option value="b">B</option></select>';
+        $combobox = (new Dom($markup, new TestInspector(selected: false, selectedIndexes: [1])))->findOrFail(Selector::css('#s'))->ensure(Combobox::class);
+
+        $this->assertSame('b', $combobox->selectedValue());
+        $this->assertSame('B', $combobox->selectedText());
+    }
+
+    #[Test]
+    public function no_selected_option_when_the_inspector_reports_none(): void
+    {
+        $markup = '<select id="s"><option value="a" selected>A</option></select>';
+        $combobox = (new Dom($markup, new TestInspector(selectedIndexes: [])))->findOrFail(Selector::css('#s'))->ensure(Combobox::class);
+
+        $this->assertNull($combobox->selectedOption());
     }
 
     private function dom(): Dom

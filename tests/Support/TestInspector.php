@@ -16,16 +16,21 @@ use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form\Field\Checkbox;
 use Zenstruck\Dom\Node\Form\Field\Input;
 use Zenstruck\Dom\Node\Form\Field\Radio;
+use Zenstruck\Dom\Node\Form\Field\Select;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 
 final class TestInspector implements Inspector
 {
+    /**
+     * @param list<int>|null $selectedIndexes
+     */
     public function __construct(
         private ?string $value = null,
         private ?bool $selected = null,
         private ?string $text = null,
         private ?bool $visible = null,
+        private ?array $selectedIndexes = null,
     ) {
     }
 
@@ -47,5 +52,10 @@ final class TestInspector implements Inspector
     public function isSelected(Checkbox|Radio|Option $node): ?bool
     {
         return $this->selected;
+    }
+
+    public function selectedIndexes(Select $node): ?array
+    {
+        return $this->selectedIndexes;
     }
 }

@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom\Node\Form\Field;
 
+use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form\Field;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Nodes;
@@ -41,6 +42,17 @@ abstract class Select extends Field
     final public function availableValues(): array
     {
         return \array_values(\array_filter($this->availableOptions()->map(static fn(Option $option) => $option->value()), static fn(string $value) => '' !== $value));
+    }
+
+    final public function selectedOptions(): Nodes
+    {
+        $indexes = $this->inspector?->selectedIndexes($this);
+
+        if (null === $indexes) {
+            return $this->availableOptions()->reduce(static fn(Node $option) => $option->ensure(Option::class)->isSelected());
+        }
+
+        return $this->availableOptions()->reduce(static fn(Node $option, int $index) => \in_array($index, $indexes, true));
     }
 
     final public function isMultiple(): bool

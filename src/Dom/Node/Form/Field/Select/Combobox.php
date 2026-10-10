@@ -22,15 +22,7 @@ final class Combobox extends Select
 
     public function selectedOption(): ?Option
     {
-        foreach ($this->availableOptions() as $option) {
-            $option = $option->ensure(Option::class);
-
-            if ($option->isSelected()) {
-                return $option;
-            }
-        }
-
-        return null;
+        return $this->selectedOptions()->first()?->ensure(Option::class);
     }
 
     public function selectedValue(): ?string

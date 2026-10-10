@@ -14,6 +14,7 @@ namespace Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Checkbox;
 use Zenstruck\Dom\Node\Form\Field\Input;
 use Zenstruck\Dom\Node\Form\Field\Radio;
+use Zenstruck\Dom\Node\Form\Field\Select;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 
@@ -35,4 +36,11 @@ interface Inspector
     public function value(Input|Textarea $node): ?string;
 
     public function isSelected(Checkbox|Radio|Option $node): ?bool;
+
+    /**
+     * Positions of the selected options among the select's options, in one call rather than one per option.
+     *
+     * @return list<int>|null
+     */
+    public function selectedIndexes(Select $node): ?array;
 }

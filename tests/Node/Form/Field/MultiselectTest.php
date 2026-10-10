@@ -64,6 +64,15 @@ final class MultiselectTest extends TestCase
         $this->assertSame(['0', '1'], $multi->selectedValues());
     }
 
+    #[Test]
+    public function selected_options_use_the_inspector_indexes_over_per_option_state(): void
+    {
+        $markup = (string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html');
+        $multi = (new Dom($markup, new TestInspector(selected: false, selectedIndexes: [1, 2])))->findOrFail(Selector::css('#input7'))->ensure(Multiselect::class);
+
+        $this->assertSame(['option 2', 'option 3'], $multi->selectedValues());
+    }
+
     private function dom(): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
