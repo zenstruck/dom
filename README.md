@@ -139,6 +139,9 @@ $node->id();                  // value of id attribute or null
 $node->isVisible();           // visibility check
 $node->isInert();             // element or an ancestor has the inert attribute
 $node->attributes();          // Attributes object
+$node->attr('title');         // attribute value or null
+$node->data('user-id');       // data-* attribute value or null (data-user-id)
+$node->hasClass('active');    // has class
 
 // TYPE GUARDS
 $node->is(Checkbox::class);            // true/false
@@ -265,6 +268,12 @@ $dom->assert()
     // ATTRIBUTES
     ->attributeContains('body', 'class', 'dark') // attribute contains value
     ->attributeDoesNotContain('body', 'class', 'light')
+    ->attributeEquals('html', 'lang', 'en')      // first matching element's attribute equals value
+    ->attributeDoesNotEqual('html', 'lang', 'fr')
+
+    // CLASSES
+    ->hasClass('body', 'dark')                   // element has class
+    ->doesNotHaveClass('body', 'light')          // element does not have class
 
     // FORM FIELDS
     ->fieldEquals('Username', 'kevin')           // field value equals

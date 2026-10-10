@@ -41,6 +41,11 @@ final class Attributes implements \IteratorAggregate, \Countable
         return \preg_split('/\s+/', $this->get('class') ?? '', -1, \PREG_SPLIT_NO_EMPTY) ?: [];
     }
 
+    public function hasClass(string $class): bool
+    {
+        return \in_array($class, $this->classes(), true);
+    }
+
     public function has(string $name): bool
     {
         return $this->element->hasAttribute($name);
