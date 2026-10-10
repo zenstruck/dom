@@ -17,24 +17,11 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Checkbox;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Checkbox::class)]
 final class CheckboxTest extends TestCase
 {
-    #[Test]
-    public function check_uncheck_call_session(): void
-    {
-        $session = new TestSession();
-        $checkbox = $this->dom($session)->findOrFail(Selector::css('#input2'))->ensure(Checkbox::class);
-
-        $checkbox->check();
-        $checkbox->uncheck();
-
-        $this->assertCount(1, $session->selected);
-        $this->assertCount(1, $session->unselected);
-    }
-
     #[Test]
     public function value_is_on_only_when_checked(): void
     {
@@ -46,16 +33,16 @@ final class CheckboxTest extends TestCase
     }
 
     #[Test]
-    public function is_checked_defers_to_the_session(): void
+    public function is_checked_defers_to_the_inspector(): void
     {
         $markup = '<form><input type="checkbox" name="agree"></form>';
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
-        $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
+        $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
     }
 
-    private function dom(?TestSession $session = null): Dom
+    private function dom(): Dom
     {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));
     }
 }

@@ -30,21 +30,16 @@ final class Option extends Field
 
     public function isSelected(): bool
     {
-        return $this->session?->isSelected($this) ?? $this->attributes()->has('selected');
+        return $this->inspector?->isSelected($this) ?? $this->attributes()->has('selected');
     }
 
     public function collection(): Nodes
     {
-        return $this->selector()?->availableOptions() ?? Nodes::create(new Crawler(), $this->session);
+        return $this->selector()?->availableOptions() ?? Nodes::create(new Crawler(), $this->inspector);
     }
 
     public function selector(): ?Select
     {
         return $this->closest('select')?->ensure(Select::class);
-    }
-
-    public function select(): void
-    {
-        $this->ensureSession()->select($this);
     }
 }

@@ -11,7 +11,6 @@
 
 namespace Zenstruck\Dom\Node\Form\Field;
 
-use Zenstruck\Dom\Exception\RuntimeException;
 use Zenstruck\Dom\Node\Form\Field;
 
 /**
@@ -23,7 +22,7 @@ final class Radio extends Field
 
     public function isSelected(): bool
     {
-        return $this->session?->isSelected($this) ?? $this->attributes()->has('checked');
+        return $this->inspector?->isSelected($this) ?? $this->attributes()->has('checked');
     }
 
     public function selected(): ?self
@@ -44,24 +43,16 @@ final class Radio extends Field
         return $this->selected()?->value();
     }
 
-    public function select(?string $value = null): void
+    public function withValue(string $value): ?self
     {
-        if (!$value) {
-            $this->ensureSession()->select($this);
+        foreach ($this->collection() as $radio) {
+            $radio = $radio->ensure(self::class);
 
-            return;
-        }
-
-        foreach ($this->collection() as $node) {
-            $node = $node->ensure(self::class);
-
-            if ($value === $node->value()) {
-                $this->ensureSession()->select($node);
-
-                return;
+            if ($value === $radio->value()) {
+                return $radio;
             }
         }
 
-        throw new RuntimeException(\sprintf('Could not find radio with value "%s".', $value));
+        return null;
     }
 }

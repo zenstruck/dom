@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Input;
 use Zenstruck\Dom\Selector;
-use Zenstruck\Dom\Tests\Support\TestSession;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Input::class)]
 final class InputTest extends TestCase
@@ -32,29 +32,17 @@ final class InputTest extends TestCase
     }
 
     #[Test]
-    public function fill_calls_session(): void
-    {
-        $session = new TestSession();
-        $input = $this->dom($session)->findOrFail(Selector::css('#input1'))->ensure(Input::class);
-
-        $input->fill('updated');
-
-        $this->assertCount(1, $session->fills);
-        $this->assertSame('updated', $session->fills[0][1]);
-    }
-
-    #[Test]
-    public function value_defers_to_the_session(): void
+    public function value_defers_to_the_inspector(): void
     {
         $markup = $this->dom()->findOrFail(Selector::css('#input1'))->ensure(Input::class);
-        $live = $this->dom(new TestSession('typed'))->findOrFail(Selector::css('#input1'))->ensure(Input::class);
+        $live = $this->dom(new TestInspector('typed'))->findOrFail(Selector::css('#input1'))->ensure(Input::class);
 
         $this->assertNotSame('typed', $markup->value());
         $this->assertSame('typed', $live->value());
     }
 
-    private function dom(?TestSession $session = null): Dom
+    private function dom(?TestInspector $inspector = null): Dom
     {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $inspector);
     }
 }
