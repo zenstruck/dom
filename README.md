@@ -149,6 +149,10 @@ $node->click(Modifier::Shift);              // requires RenderedSession
 $node->click('shift', 'alt');               // modifiers by name, in any letter case
 $node->doubleClick();                       // requires RenderedSession
 $node->rightClick(Modifier::ControlOrMeta); // Cmd on macOS, Ctrl elsewhere
+$node->hover();                             // requires RenderedSession
+$node->hover(Modifier::Alt);                // hold modifier keys while hovering
+$node->focus();                             // requires RenderedSession
+$node->blur();                              // requires RenderedSession
 
 // TYPE GUARDS
 $node->is(Checkbox::class);            // true/false
@@ -334,11 +338,15 @@ interface RenderedSession extends Session
     public function click(Node $node, Modifier ...$modifiers): void;
     public function doubleClick(Node $node, Modifier ...$modifiers): void;
     public function rightClick(Node $node, Modifier ...$modifiers): void;
+    public function hover(Node $node, Modifier ...$modifiers): void;
+    public function focus(Node $node): void;
+    public function blur(Node $node): void;
 }
 ```
 
 `Node::text()` and `Node::isVisible()` defer to it when available. `Node::doubleClick()`,
-`Node::rightClick()` and a `Node::click()` with modifiers require it, and throw without one.
+`Node::rightClick()`, `Node::hover()`, `Node::focus()`, `Node::blur()` and a `Node::click()` with
+modifiers require it, and throw without one.
 
 > [!TIP]
 > Both interfaces are implemented by [zenstruck/browser](https://github.com/zenstruck/browser),

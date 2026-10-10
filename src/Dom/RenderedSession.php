@@ -13,8 +13,9 @@ namespace Zenstruck\Dom;
 
 /**
  * A session driving a real browser, which can answer from what is rendered and perform the
- * gestures only a browser can, such as double, right and modified clicks. The markup alone
- * cannot answer: a stylesheet hides an element with no inline style of its own to detect.
+ * gestures only a browser can, such as hovering, focusing and double, right or modified clicks.
+ * The markup alone cannot answer: a stylesheet hides an element with no inline style of its own
+ * to detect.
  *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
@@ -32,4 +33,10 @@ interface RenderedSession extends Session
     public function doubleClick(Node $node, Modifier ...$modifiers): void;
 
     public function rightClick(Node $node, Modifier ...$modifiers): void;
+
+    public function hover(Node $node, Modifier ...$modifiers): void;
+
+    public function focus(Node $node): void;
+
+    public function blur(Node $node): void;
 }

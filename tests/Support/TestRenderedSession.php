@@ -26,6 +26,15 @@ final class TestRenderedSession extends TestSession implements RenderedSession
     /** @var list<array{Node, list<Modifier>}> */
     public array $rightClicked = [];
 
+    /** @var list<array{Node, list<Modifier>}> */
+    public array $hovered = [];
+
+    /** @var list<Node> */
+    public array $focused = [];
+
+    /** @var list<Node> */
+    public array $blurred = [];
+
     public function __construct(private string $text = 'rendered text', private bool $visible = false)
     {
     }
@@ -59,5 +68,20 @@ final class TestRenderedSession extends TestSession implements RenderedSession
     public function rightClick(Node $node, Modifier ...$modifiers): void
     {
         $this->rightClicked[] = [$node, $modifiers];
+    }
+
+    public function hover(Node $node, Modifier ...$modifiers): void
+    {
+        $this->hovered[] = [$node, $modifiers];
+    }
+
+    public function focus(Node $node): void
+    {
+        $this->focused[] = $node;
+    }
+
+    public function blur(Node $node): void
+    {
+        $this->blurred[] = $node;
     }
 }

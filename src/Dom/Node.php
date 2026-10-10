@@ -259,6 +259,21 @@ class Node
         $this->ensureRenderedSession()->rightClick($this, ...self::normalizeModifiers($modifiers));
     }
 
+    final public function hover(Modifier|string ...$modifiers): void
+    {
+        $this->ensureRenderedSession()->hover($this, ...self::normalizeModifiers($modifiers));
+    }
+
+    final public function focus(): void
+    {
+        $this->ensureRenderedSession()->focus($this);
+    }
+
+    final public function blur(): void
+    {
+        $this->ensureRenderedSession()->blur($this);
+    }
+
     /**
      * @codeCoverageIgnore
      */

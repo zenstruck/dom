@@ -522,25 +522,45 @@ final class NodeTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('renderedClicks')]
-    public function rendered_clicks_throw_without_a_rendered_session(callable $click): void
+    public function hover_focus_and_blur_defer_to_a_rendered_session(): void
+    {
+        $crawler = (new Crawler('<input>'))->filter('input');
+        $session = new TestRenderedSession();
+        $node = Node::create($crawler, $session);
+
+        $node->hover();
+        $node->hover('alt');
+        $node->focus();
+        $node->blur();
+
+        $this->assertSame([[$node, []], [$node, [Modifier::Alt]]], $session->hovered);
+        $this->assertSame([$node], $session->focused);
+        $this->assertSame([$node], $session->blurred);
+    }
+
+    #[Test]
+    #[DataProvider('renderedGestures')]
+    public function rendered_gestures_throw_without_a_rendered_session(callable $gesture): void
     {
         $crawler = (new Crawler('<div>content</div>'))->filter('div');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No rendered session available.');
 
-        $click(Node::create($crawler, new TestSession()));
+        $gesture(Node::create($crawler, new TestSession()));
     }
 
     /**
      * @return iterable<string, array{callable(Node):void}>
      */
-    public static function renderedClicks(): iterable
+    public static function renderedGestures(): iterable
     {
         yield 'modified click' => [static fn(Node $node) => $node->click(Modifier::Shift)];
         yield 'double click' => [static fn(Node $node) => $node->doubleClick()];
         yield 'right click' => [static fn(Node $node) => $node->rightClick()];
+        yield 'hover' => [static fn(Node $node) => $node->hover()];
+        yield 'focus' => [static fn(Node $node) => $node->focus()];
+        yield 'blur' => [static fn(Node $node) => $node->blur()];
     }
 
     #[Test]
