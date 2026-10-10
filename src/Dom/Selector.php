@@ -37,6 +37,7 @@ final class Selector implements \Stringable
     private const SEPARATOR = ':==:';
     private const SEPARATOR_FORMAT = '%s'.self::SEPARATOR.'%s';
     private const XPATH_FIELD = '*[self::input or self::select or self::textarea]';
+    private const XPATH_BUTTON = '*[self::button or self::input[@type = "submit" or @type = "button" or @type = "reset" or @type = "image"]]';
     private const VALID_TYPES = [
         self::TYPE_AUTO,
         self::TYPE_CSS,
@@ -215,7 +216,7 @@ final class Selector implements \Stringable
             self::TYPE_CSS => $crawler->filter($value),
             self::TYPE_ID => $crawler->filterXPath(\sprintf('descendant-or-self::*[@id = %s]', self::xpathQuote(\ltrim($value, '#')))),
             self::TYPE_LINK => self::filterLink($crawler, $value),
-            self::TYPE_BUTTON => $crawler->selectButton($value),
+            self::TYPE_BUTTON => self::filterButton($crawler, $value),
             self::TYPE_IMAGE => $crawler->selectImage($value),
             self::TYPE_FIELD_FOR_NAME => $crawler->filterXPath(\sprintf('descendant-or-self::%s[@name = %s]', self::XPATH_FIELD, self::xpathQuote($value))),
             self::TYPE_FIELD_FOR_LABEL => self::filterFieldForLabel($crawler, $value),
@@ -227,17 +228,39 @@ final class Selector implements \Stringable
 
     private static function filterLink(Crawler $crawler, string $value): Crawler
     {
+        // an icon link's only name is its aria-label, so an exact one beats selectLink()'s word match
+        foreach ([[true, null], [true, 'aria-label']] as [$exact, $attribute]) {
+            if (\count($link = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, $exact, $attribute)))) {
+                return $link;
+            }
+        }
+
+        // a whole word of the text, or an image's alt
         if (\count($link = $crawler->selectLink($value))) {
             return $link;
         }
 
-        // try with partial link text
-        if (\count($link = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, exact: false)))) {
-            return $link;
+        foreach ([null, 'aria-label', 'title'] as $attribute) {
+            if (\count($link = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, exact: false, attribute: $attribute)))) {
+                return $link;
+            }
         }
 
-        // try with title tag
-        return self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching('a', $value, exact: false, attribute: 'title'));
+        return new Crawler();
+    }
+
+    private static function filterButton(Crawler $crawler, string $value): Crawler
+    {
+        // as for links, an exact aria-label beats selectButton()'s word match
+        if (\count($button = self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching(self::XPATH_BUTTON, $value, true, 'aria-label')))) {
+            return $button;
+        }
+
+        if (\count($button = $crawler->selectButton($value))) {
+            return $button;
+        }
+
+        return self::filterByType($crawler, self::TYPE_XPATH, self::xpathMatching(self::XPATH_BUTTON, $value, false, 'aria-label'));
     }
 
     /**

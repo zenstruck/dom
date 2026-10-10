@@ -73,8 +73,8 @@ $dom->findAll('li');                // Nodes - collection of matching elements
 
 // SELECTOR RESOLUTION (strings are auto-detected in this order)
 $dom->find('.my-class');            // 1. CSS selector
-$dom->find('Submit');               // 2. Button text/value
-$dom->find('Click here');           // 3. Link text/title
+$dom->find('Submit');               // 2. Button text/value/aria-label
+$dom->find('Click here');           // 3. Link text/aria-label/title
 $dom->find('Logo');                 // 4. Image alt text
 $dom->find('main-content');         // 5. Element ID
 $dom->find('email');                // 6. Field name attribute

@@ -725,6 +725,48 @@ final class SelectorTest extends TestCase
         $this->assertSame('q', $dom->find(Selector::field('Search'))?->attr('name'));
     }
 
+    #[Test]
+    public function link_matches_aria_label(): void
+    {
+        $dom = new Dom('<a href="/settings" aria-label="Settings"><svg></svg></a>');
+
+        $this->assertSame('/settings', $dom->find(Selector::link('settings'))?->attr('href'));
+    }
+
+    #[Test]
+    public function exact_link_aria_label_beats_partial_text(): void
+    {
+        $dom = new Dom('<a href="/all">Close all tabs</a><a href="/one" aria-label="Close">×</a>');
+
+        $this->assertSame('/one', $dom->find(Selector::link('Close'))?->attr('href'));
+    }
+
+    #[Test]
+    public function button_matches_aria_label(): void
+    {
+        $dom = new Dom('<form><button aria-label="Close dialog">×</button><input type="submit" aria-label="Send message" value="→"></form>');
+
+        $this->assertSame('button', $dom->find(Selector::button('close dialog'))?->tag());
+        $this->assertSame('input', $dom->find(Selector::button('send'))?->tag());
+        $this->assertSame('button', $dom->find(Selector::clickable('Close dialog'))?->tag());
+    }
+
+    #[Test]
+    public function aria_label_on_a_non_button_is_not_a_button(): void
+    {
+        $dom = new Dom('<div aria-label="Close"></div><input type="text" aria-label="Close">');
+
+        $this->assertNull($dom->find(Selector::button('Close')));
+    }
+
+    #[Test]
+    public function exact_button_aria_label_beats_word_match(): void
+    {
+        $dom = new Dom('<form><button name="all">Close all</button><button name="one" aria-label="Close">×</button></form>');
+
+        $this->assertSame('one', $dom->find(Selector::button('Close'))?->attr('name'));
+    }
+
     private function createCrawler(): Crawler
     {
         return new Crawler(\file_get_contents(__DIR__.'/Fixtures/page.html'));
