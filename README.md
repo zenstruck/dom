@@ -193,7 +193,6 @@ $radio = $dom->findOrFail(Selector::field('gender'))->ensure(Radio::class);
 $radio->isSelected();
 $radio->selected();           // the selected Radio node
 $radio->selectedValue();
-$radio->withValue('female');  // the Radio in the same group with this value, or null
 
 // COMBOBOX (single select)
 $select = $dom->findOrFail(Selector::field('country'))->ensure(Combobox::class);

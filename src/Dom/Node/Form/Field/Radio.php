@@ -47,17 +47,4 @@ final class Radio extends Field
     {
         return $this->selected()?->value();
     }
-
-    public function withValue(string $value): ?self
-    {
-        foreach ($this->collection() as $radio) {
-            $radio = $radio->ensure(self::class);
-
-            if ($value === $radio->value()) {
-                return $radio;
-            }
-        }
-
-        return null;
-    }
 }

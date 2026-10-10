@@ -23,15 +23,6 @@ use Zenstruck\Dom\Tests\Support\TestInspector;
 final class RadioTest extends TestCase
 {
     #[Test]
-    public function with_value_finds_the_matching_radio_in_the_group(): void
-    {
-        $radio = $this->dom()->findOrFail(Selector::css('#radio1'))->ensure(Radio::class);
-
-        $this->assertSame('option 3', $radio->withValue('option 3')?->value());
-        $this->assertNull($radio->withValue('missing'));
-    }
-
-    #[Test]
     public function selected_returns_null_when_none_checked(): void
     {
         $dom = new Dom('<form><input type="radio" name="group" value="a"><input type="radio" name="group" value="b"></form>');
@@ -57,7 +48,6 @@ final class RadioTest extends TestCase
         $radio = $dom->findOrFail(Selector::css('input[value="inside"]'))->ensure(Radio::class);
 
         $this->assertSame(['before', 'inside', 'after'], $radio->collection()->map(static fn(Radio $radio) => $radio->value()));
-        $this->assertSame('after', $radio->withValue('after')?->value());
     }
 
     #[Test]
@@ -66,10 +56,5 @@ final class RadioTest extends TestCase
         $dom = new Dom('<form><input type="radio" name="g"></form>');
 
         $this->assertSame('on', $dom->findOrFail(Selector::css('input'))->ensure(Radio::class)->value());
-    }
-
-    private function dom(): Dom
-    {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));
     }
 }
