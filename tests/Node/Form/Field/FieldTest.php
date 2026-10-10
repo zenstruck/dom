@@ -59,17 +59,21 @@ final class FieldTest extends TestCase
     }
 
     #[Test]
-    public function collection_is_empty_without_name_or_form(): void
+    public function collection_is_empty_without_name(): void
     {
         $dom = new Dom('<input value="no-name">');
         $field = $dom->findOrFail(Selector::css('input'))->ensure(Input::class);
 
         $this->assertCount(0, $field->collection());
+    }
 
-        $dom = new Dom('<input name="outside">');
+    #[Test]
+    public function collection_without_form_holds_the_fields_sharing_its_name(): void
+    {
+        $dom = new Dom('<input name="outside"><input name="outside"><input name="other">');
         $field = $dom->findOrFail(Selector::css('input'))->ensure(Input::class);
 
-        $this->assertCount(0, $field->collection());
+        $this->assertCount(2, $field->collection());
     }
 
     #[Test]

@@ -689,6 +689,118 @@ final class SelectorTest extends TestCase
         $this->assertNull($dom->find(Selector::fieldForLabel('email')));
     }
 
+    #[Test]
+    #[DataProvider('accessibleNames')]
+    public function field_for_label_matches_the_accessible_name(string $html, string $search): void
+    {
+        $this->assertSame('target', (new Dom($html))->find(Selector::fieldForLabel($search))?->attr('name'));
+    }
+
+    public static function accessibleNames(): iterable
+    {
+        yield 'aria-label' => ['<input name="target" aria-label="Search">', 'search'];
+        yield 'aria-label partial' => ['<input name="target" aria-label="Search the site">', 'search'];
+        yield 'aria-labelledby' => ['<h2 id="heading">Billing address</h2><input name="target" aria-labelledby="heading">', 'Billing address'];
+        yield 'aria-labelledby with several ids' => ['<span id="a">Street</span><span id="b">Line 2</span><input name="target" aria-labelledby="a b">', 'line 2'];
+        yield 'placeholder' => ['<input name="target" placeholder="you@example.com">', 'you@example.com'];
+        yield 'textarea placeholder' => ['<textarea name="target" placeholder="Comment"></textarea>', 'comment'];
+        yield 'select aria-label' => ['<select name="target" aria-label="Country"></select>', 'country'];
+        yield 'exact placeholder beats partial label' => ['<label>Email address <input name="other"></label><input name="target" placeholder="Email">', 'email'];
+        yield 'label beats placeholder' => ['<input name="other" placeholder="Email"><label>Email <input name="target"></label>', 'email'];
+    }
+
+    #[Test]
+    public function aria_labelledby_ignores_elements_no_field_references(): void
+    {
+        $dom = new Dom('<h2 id="heading">Search</h2><input name="target" placeholder="Search">');
+
+        $this->assertSame('target', $dom->find(Selector::fieldForLabel('Search'))?->attr('name'));
+    }
+
+    #[Test]
+    public function field_selector_falls_back_to_the_accessible_name(): void
+    {
+        $dom = new Dom('<form><input name="q" placeholder="Search"></form>');
+
+        $this->assertSame('q', $dom->find(Selector::field('Search'))?->attr('name'));
+    }
+
+    #[Test]
+    public function link_matches_aria_label(): void
+    {
+        $dom = new Dom('<a href="/settings" aria-label="Settings"><svg></svg></a>');
+
+        $this->assertSame('/settings', $dom->find(Selector::link('settings'))?->attr('href'));
+    }
+
+    #[Test]
+    public function exact_link_aria_label_beats_partial_text(): void
+    {
+        $dom = new Dom('<a href="/all">Close all tabs</a><a href="/one" aria-label="Close">×</a>');
+
+        $this->assertSame('/one', $dom->find(Selector::link('Close'))?->attr('href'));
+    }
+
+    #[Test]
+    public function button_matches_aria_label(): void
+    {
+        $dom = new Dom('<form><button aria-label="Close dialog">×</button><input type="submit" aria-label="Send message" value="→"></form>');
+
+        $this->assertSame('button', $dom->find(Selector::button('close dialog'))?->tag());
+        $this->assertSame('input', $dom->find(Selector::button('send'))?->tag());
+        $this->assertSame('button', $dom->find(Selector::clickable('Close dialog'))?->tag());
+    }
+
+    #[Test]
+    public function aria_label_on_a_non_button_is_not_a_button(): void
+    {
+        $dom = new Dom('<div aria-label="Close"></div><input type="text" aria-label="Close">');
+
+        $this->assertNull($dom->find(Selector::button('Close')));
+    }
+
+    #[Test]
+    public function exact_button_aria_label_beats_word_match(): void
+    {
+        $dom = new Dom('<form><button name="all">Close all</button><button name="one" aria-label="Close">×</button></form>');
+
+        $this->assertSame('one', $dom->find(Selector::button('Close'))?->attr('name'));
+    }
+
+    #[Test]
+    #[DataProvider('clickableRoles')]
+    public function clickable_matches_button_and_link_roles(string $html, string $search): void
+    {
+        $this->assertSame('target', (new Dom($html))->find(Selector::clickable($search))?->attr('id'));
+    }
+
+    public static function clickableRoles(): iterable
+    {
+        yield 'role button' => ['<div id="target" role="button">Open menu</div>', 'Open menu'];
+        yield 'role button partial' => ['<span id="target" role="button">Open menu</span>', 'menu'];
+        yield 'role button aria-label' => ['<div id="target" role="button" aria-label="Dismiss">×</div>', 'dismiss'];
+        yield 'summary' => ['<details><summary id="target">More details</summary><p>x</p></details>', 'More details'];
+        yield 'role link' => ['<span id="target" role="link">Read more</span>', 'read more'];
+        yield 'role link title' => ['<span id="target" role="link" title="Documentation">Docs</span>', 'documentation'];
+    }
+
+    #[Test]
+    public function exact_button_text_beats_word_match(): void
+    {
+        $dom = new Dom('<form><button name="all">Save all</button><button name="one">Save</button></form>');
+
+        $this->assertSame('one', $dom->find(Selector::button('Save'))?->attr('name'));
+    }
+
+    #[Test]
+    public function other_roles_are_not_clickable_by_text(): void
+    {
+        $dom = new Dom('<div role="dialog">Open menu</div>');
+
+        $this->assertNull($dom->find(Selector::button('Open menu')));
+        $this->assertNull($dom->find(Selector::link('Open menu')));
+    }
+
     private function createCrawler(): Crawler
     {
         return new Crawler(\file_get_contents(__DIR__.'/Fixtures/page.html'));

@@ -40,13 +40,24 @@ abstract class Field extends Element
         return $this->attributes()->get('name');
     }
 
+    /**
+     * The fields sharing this field's name and form owner (eg a radio button group).
+     */
     public function collection(): Nodes
     {
         if (!$name = $this->name()) {
             return Nodes::create(new Crawler(), $this->inspector);
         }
 
-        return $this->form()?->fields(Selector::fieldForName($name)) ?? Nodes::create(new Crawler(), $this->inspector);
+        if ($form = $this->form()) {
+            return $form->fields(Selector::fieldForName($name));
+        }
+
+        // fields without a form owner share the document
+        return $this->root()
+            ->descendants(Selector::fieldForName($name))
+            ->reduce(static fn(Node $node) => $node instanceof Element && null === $node->form())
+        ;
     }
 
     final public function isDisabled(): bool
