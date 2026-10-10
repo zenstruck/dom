@@ -364,6 +364,20 @@ final class FormTest extends TestCase
         }
     }
 
+    #[Test]
+    public function is_required(): void
+    {
+        $this->assertTrue($this->dom()->findOrFail(Selector::field('required_field'))->ensure(Field::class)->isRequired());
+        $this->assertFalse($this->dom()->findOrFail(Selector::field('input_1'))->ensure(Field::class)->isRequired());
+    }
+
+    #[Test]
+    public function is_readonly(): void
+    {
+        $this->assertTrue($this->dom()->findOrFail(Selector::field('readonly_field'))->ensure(Field::class)->isReadonly());
+        $this->assertFalse($this->dom()->findOrFail(Selector::field('input_1'))->ensure(Field::class)->isReadonly());
+    }
+
     // --- Form Attribute Support ---
 
     #[Test]

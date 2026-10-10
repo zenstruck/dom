@@ -53,6 +53,16 @@ abstract class Field extends Element
         return $this->attributes()->has('disabled');
     }
 
+    final public function isRequired(): bool
+    {
+        return $this->attributes()->has('required');
+    }
+
+    final public function isReadonly(): bool
+    {
+        return $this->attributes()->has('readonly');
+    }
+
     public function value(): mixed
     {
         return $this->attributes()->get('value');

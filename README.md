@@ -137,6 +137,7 @@ $node->innerHtml();           // the node's inner HTML
 $node->tag();                 // tag name (e.g. "div", "input")
 $node->id();                  // value of id attribute or null
 $node->isVisible();           // visibility check
+$node->isInert();             // element or an ancestor has the inert attribute
 $node->attributes();          // Attributes object
 
 // TYPE GUARDS
@@ -226,6 +227,8 @@ $field->name();               // name attribute
 $field->value();              // current value
 $field->label();              // associated Label node or null
 $field->isDisabled();
+$field->isRequired();
+$field->isReadonly();
 $field->form();               // parent Form node
 
 // FORM
@@ -270,6 +273,12 @@ $dom->assert()
     ->fieldNotChecked('Remember me')             // checkbox not checked
     ->fieldSelected('Role', 'Admin')             // option is selected
     ->fieldNotSelected('Role', 'Guest')          // option is not selected
+    ->fieldIsDisabled('Username')                // field has disabled attribute
+    ->fieldIsEnabled('Username')
+    ->fieldIsRequired('Username')                // field has required attribute
+    ->fieldIsOptional('Username')
+    ->fieldIsReadonly('Username')                // field has readonly attribute
+    ->fieldIsNotReadonly('Username')
 ;
 ```
 
