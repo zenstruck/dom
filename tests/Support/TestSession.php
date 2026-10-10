@@ -21,7 +21,7 @@ use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 use Zenstruck\Dom\Session;
 
-final class TestSession implements Session
+class TestSession implements Session
 {
     /** @var list<Node> */
     public array $clicked = [];
@@ -37,6 +37,12 @@ final class TestSession implements Session
 
     /** @var list<array{Input|Textarea, string}> */
     public array $fills = [];
+
+    public function __construct(
+        private ?string $value = null,
+        private bool $selectedState = false,
+    ) {
+    }
 
     public function click(Node $node): void
     {
@@ -61,5 +67,15 @@ final class TestSession implements Session
     public function fill(Input|Textarea $node, string $value): void
     {
         $this->fills[] = [$node, $value];
+    }
+
+    public function value(Input|Textarea $node): ?string
+    {
+        return $this->value;
+    }
+
+    public function isSelected(Checkbox|Radio|Option $node): bool
+    {
+        return $this->selectedState;
     }
 }

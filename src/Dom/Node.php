@@ -65,6 +65,10 @@ class Node
 
     final public function isVisible(): bool
     {
+        if ($this->session instanceof RenderedSession) {
+            return $this->session->isVisible($this);
+        }
+
         if ($this->attributes()->has('hidden')) {
             return false;
         }
@@ -101,6 +105,10 @@ class Node
 
     final public function text(): string
     {
+        if ($this->session instanceof RenderedSession) {
+            return $this->session->text($this);
+        }
+
         return $this->crawler->text();
     }
 

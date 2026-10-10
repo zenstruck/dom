@@ -22,7 +22,7 @@ final class Textarea extends Field
 
     public function value(): string
     {
-        return $this->directText();
+        return $this->session?->value($this) ?? $this->directText();
     }
 
     public function fill(string $value): void

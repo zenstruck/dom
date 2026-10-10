@@ -30,7 +30,7 @@ final class Option extends Field
 
     public function isSelected(): bool
     {
-        return $this->attributes()->has('selected');
+        return $this->session?->isSelected($this) ?? $this->attributes()->has('selected');
     }
 
     public function collection(): Nodes

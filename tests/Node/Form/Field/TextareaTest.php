@@ -43,4 +43,13 @@ final class TextareaTest extends TestCase
         $this->assertCount(1, $session->fills);
         $this->assertSame('Updated', $session->fills[0][1]);
     }
+
+    #[Test]
+    public function value_defers_to_the_session(): void
+    {
+        $markup = '<form><textarea name="bio">Initial</textarea></form>';
+
+        $this->assertSame('Initial', (new Dom($markup))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
+        $this->assertSame('typed', (new Dom($markup, new TestSession('typed')))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
+    }
 }

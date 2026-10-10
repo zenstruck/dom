@@ -23,7 +23,7 @@ final class Radio extends Field
 
     public function isSelected(): bool
     {
-        return $this->attributes()->has('checked');
+        return $this->session?->isSelected($this) ?? $this->attributes()->has('checked');
     }
 
     public function selected(): ?self

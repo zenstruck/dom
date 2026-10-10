@@ -29,6 +29,8 @@ use Zenstruck\Dom\Node\Form\Field\Select\Multiselect;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 use Zenstruck\Dom\Node\Form\Label;
+use Zenstruck\Dom\Tests\Support\TestRenderedSession;
+use Zenstruck\Dom\Tests\Support\TestSession;
 
 #[CoversClass(Node::class)]
 final class NodeTest extends TestCase
@@ -479,6 +481,24 @@ final class NodeTest extends TestCase
         $node = Node::create($crawler, null);
 
         $this->assertTrue($node->isVisible());
+    }
+
+    #[Test]
+    public function is_visible_defers_to_a_rendered_session(): void
+    {
+        $crawler = (new Crawler('<div>content</div>'))->filter('div');
+
+        $this->assertTrue(Node::create($crawler, new TestRenderedSession(visible: true))->isVisible());
+        $this->assertFalse(Node::create($crawler, new TestRenderedSession(visible: false))->isVisible());
+    }
+
+    #[Test]
+    public function text_defers_to_a_rendered_session(): void
+    {
+        $crawler = (new Crawler('<div>markup text</div>'))->filter('div');
+
+        $this->assertSame('markup text', Node::create($crawler, new TestSession())->text());
+        $this->assertSame('rendered text', Node::create($crawler, new TestRenderedSession())->text());
     }
 
     #[Test]

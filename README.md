@@ -304,11 +304,32 @@ interface Session
     public function unselect(Checkbox|Multiselect $node): void;
     public function attach(File $node, array $filenames): void;
     public function fill(Input|Textarea $node, string $value): void;
+
+    public function value(Input|Textarea $node): ?string;
+    public function isSelected(Checkbox|Radio|Option $node): bool;
 }
 ```
 
+The last two read back what the first five change. Typing and clicking update DOM properties, which
+never appear in the markup, so `Input::value()`, `Textarea::value()`, `Checkbox::isChecked()`,
+`Radio::isSelected()` and `Option::isSelected()` ask the session first and fall back to the markup
+when there is none.
+
+A session driving a real browser can also implement `RenderedSession`, which answers from what the
+browser renders:
+
+```php
+interface RenderedSession extends Session
+{
+    public function text(Node $node): string;
+    public function isVisible(Node $node): bool;
+}
+```
+
+`Node::text()` and `Node::isVisible()` defer to it when available.
+
 > [!TIP]
-> This interface is implemented by [zenstruck/browser](https://github.com/zenstruck/browser),
+> Both interfaces are implemented by [zenstruck/browser](https://github.com/zenstruck/browser),
 > allowing the same DOM API to drive real browser interactions.
 
 ## Known Limitations
@@ -320,7 +341,8 @@ interface Session
 > [!NOTE]
 > **`isVisible()` performs basic checks only.** It detects `hidden` attributes, `type="hidden"`
 > inputs, and inline `display:none`/`visibility:hidden` styles. It does not evaluate CSS
-> stylesheets or inherited styles.
+> stylesheets or inherited styles. Provide a [`RenderedSession`](#session-interface) to have a real
+> browser answer instead.
 
 ## Testing
 
