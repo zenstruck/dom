@@ -767,6 +767,40 @@ final class SelectorTest extends TestCase
         $this->assertSame('one', $dom->find(Selector::button('Close'))?->attr('name'));
     }
 
+    #[Test]
+    #[DataProvider('clickableRoles')]
+    public function clickable_matches_button_and_link_roles(string $html, string $search): void
+    {
+        $this->assertSame('target', (new Dom($html))->find(Selector::clickable($search))?->attr('id'));
+    }
+
+    public static function clickableRoles(): iterable
+    {
+        yield 'role button' => ['<div id="target" role="button">Open menu</div>', 'Open menu'];
+        yield 'role button partial' => ['<span id="target" role="button">Open menu</span>', 'menu'];
+        yield 'role button aria-label' => ['<div id="target" role="button" aria-label="Dismiss">×</div>', 'dismiss'];
+        yield 'summary' => ['<details><summary id="target">More details</summary><p>x</p></details>', 'More details'];
+        yield 'role link' => ['<span id="target" role="link">Read more</span>', 'read more'];
+        yield 'role link title' => ['<span id="target" role="link" title="Documentation">Docs</span>', 'documentation'];
+    }
+
+    #[Test]
+    public function exact_button_text_beats_word_match(): void
+    {
+        $dom = new Dom('<form><button name="all">Save all</button><button name="one">Save</button></form>');
+
+        $this->assertSame('one', $dom->find(Selector::button('Save'))?->attr('name'));
+    }
+
+    #[Test]
+    public function other_roles_are_not_clickable_by_text(): void
+    {
+        $dom = new Dom('<div role="dialog">Open menu</div>');
+
+        $this->assertNull($dom->find(Selector::button('Open menu')));
+        $this->assertNull($dom->find(Selector::link('Open menu')));
+    }
+
     private function createCrawler(): Crawler
     {
         return new Crawler(\file_get_contents(__DIR__.'/Fixtures/page.html'));

@@ -91,7 +91,7 @@ $dom->find(Selector::testId('checkout'));          // by data-testid attribute
 $dom->find(Selector::field('email'));              // by name or label
 $dom->find(Selector::fieldForName('email'));       // by name only
 $dom->find(Selector::fieldForLabel('Email'));      // by label, aria-labelledby, aria-label or placeholder
-$dom->find(Selector::clickable('Submit'));         // buttons first, then links
+$dom->find(Selector::clickable('Submit'));         // buttons first, then links (incl. <summary> and role="button"/"link")
 
 // SEPARATOR SYNTAX (inline type forcing)
 $dom->find('css:==:.my-class');
