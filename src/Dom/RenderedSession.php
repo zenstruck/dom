@@ -12,8 +12,9 @@
 namespace Zenstruck\Dom;
 
 /**
- * A session driving a real browser, which can answer from what is rendered. The markup alone
- * cannot: a stylesheet hides an element with no inline style of its own to detect.
+ * A session driving a real browser, which can answer from what is rendered and perform the
+ * gestures only a browser can, such as double, right and modified clicks. The markup alone
+ * cannot answer: a stylesheet hides an element with no inline style of its own to detect.
  *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
@@ -25,4 +26,10 @@ interface RenderedSession extends Session
     public function text(Node $node): string;
 
     public function isVisible(Node $node): bool;
+
+    public function click(Node $node, Modifier ...$modifiers): void;
+
+    public function doubleClick(Node $node, Modifier ...$modifiers): void;
+
+    public function rightClick(Node $node, Modifier ...$modifiers): void;
 }

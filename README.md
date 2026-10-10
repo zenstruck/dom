@@ -143,6 +143,13 @@ $node->attr('title');         // attribute value or null
 $node->data('user-id');       // data-* attribute value or null (data-user-id)
 $node->hasClass('active');    // has class
 
+// INTERACTION
+$node->click();                             // requires Session
+$node->click(Modifier::Shift);              // requires RenderedSession
+$node->click('shift', 'alt');               // modifiers by name, in any letter case
+$node->doubleClick();                       // requires RenderedSession
+$node->rightClick(Modifier::ControlOrMeta); // Cmd on macOS, Ctrl elsewhere
+
 // TYPE GUARDS
 $node->is(Checkbox::class);            // true/false
 $node->ensure(Checkbox::class);        // returns typed node or throws
@@ -316,17 +323,22 @@ never appear in the markup, so `Input::value()`, `Textarea::value()`, `Checkbox:
 when there is none.
 
 A session driving a real browser can also implement `RenderedSession`, which answers from what the
-browser renders:
+browser renders and performs the gestures only a browser can:
 
 ```php
 interface RenderedSession extends Session
 {
     public function text(Node $node): string;
     public function isVisible(Node $node): bool;
+
+    public function click(Node $node, Modifier ...$modifiers): void;
+    public function doubleClick(Node $node, Modifier ...$modifiers): void;
+    public function rightClick(Node $node, Modifier ...$modifiers): void;
 }
 ```
 
-`Node::text()` and `Node::isVisible()` defer to it when available.
+`Node::text()` and `Node::isVisible()` defer to it when available. `Node::doubleClick()`,
+`Node::rightClick()` and a `Node::click()` with modifiers require it, and throw without one.
 
 > [!TIP]
 > Both interfaces are implemented by [zenstruck/browser](https://github.com/zenstruck/browser),

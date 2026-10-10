@@ -12,11 +12,13 @@
 namespace Zenstruck\Dom\Tests;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom;
 use Zenstruck\Dom\Exception\RuntimeException;
+use Zenstruck\Dom\Modifier;
 use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form;
 use Zenstruck\Dom\Node\Form\Button;
@@ -499,6 +501,46 @@ final class NodeTest extends TestCase
 
         $this->assertSame('markup text', Node::create($crawler, new TestSession())->text());
         $this->assertSame('rendered text', Node::create($crawler, new TestRenderedSession())->text());
+    }
+
+    #[Test]
+    public function rendered_clicks_defer_to_a_rendered_session(): void
+    {
+        $crawler = (new Crawler('<div>content</div>'))->filter('div');
+        $session = new TestRenderedSession();
+        $node = Node::create($crawler, $session);
+
+        $node->click();
+        $node->click('shift', Modifier::ControlOrMeta);
+        $node->doubleClick();
+        $node->rightClick('alt');
+
+        $this->assertSame([$node], $session->clicked);
+        $this->assertSame([[$node, [Modifier::Shift, Modifier::ControlOrMeta]]], $session->modifiedClicks);
+        $this->assertSame([[$node, []]], $session->doubleClicked);
+        $this->assertSame([[$node, [Modifier::Alt]]], $session->rightClicked);
+    }
+
+    #[Test]
+    #[DataProvider('renderedClicks')]
+    public function rendered_clicks_throw_without_a_rendered_session(callable $click): void
+    {
+        $crawler = (new Crawler('<div>content</div>'))->filter('div');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No rendered session available.');
+
+        $click(Node::create($crawler, new TestSession()));
+    }
+
+    /**
+     * @return iterable<string, array{callable(Node):void}>
+     */
+    public static function renderedClicks(): iterable
+    {
+        yield 'modified click' => [static fn(Node $node) => $node->click(Modifier::Shift)];
+        yield 'double click' => [static fn(Node $node) => $node->doubleClick()];
+        yield 'right click' => [static fn(Node $node) => $node->rightClick()];
     }
 
     #[Test]
