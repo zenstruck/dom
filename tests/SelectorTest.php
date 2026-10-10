@@ -88,6 +88,9 @@ final class SelectorTest extends TestCase
         $this->assertInstanceOf(Selector::class, $selector);
     }
 
+    /**
+     * @test
+     */
     #[Test]
     public function testid_returns_selector_instance(): void
     {
