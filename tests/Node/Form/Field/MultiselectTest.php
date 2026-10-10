@@ -18,6 +18,7 @@ use Zenstruck\Dom;
 use Zenstruck\Dom\Node\Form\Field\Select\Multiselect;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Selector;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Multiselect::class)]
 final class MultiselectTest extends TestCase
@@ -40,6 +41,18 @@ final class MultiselectTest extends TestCase
         $multi = $this->dom()->findOrFail(Selector::css('#input7'))->ensure(Multiselect::class);
 
         $this->assertSame(['option 1', 'option 3'], $multi->value());
+    }
+
+    #[Test]
+    public function selected_options_defer_to_the_inspector(): void
+    {
+        $markup = (string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html');
+
+        $none = (new Dom($markup, new TestInspector(selected: false)))->findOrFail(Selector::css('#input7'))->ensure(Multiselect::class);
+        $all = (new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('#input7'))->ensure(Multiselect::class);
+
+        $this->assertSame([], $none->selectedValues());
+        $this->assertSame(['option 1', 'option 2', 'option 3'], $all->selectedValues());
     }
 
     private function dom(): Dom

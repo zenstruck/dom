@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom\Node\Form\Field\Select;
 
+use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form\Field\Select;
 use Zenstruck\Dom\Nodes;
 
@@ -23,7 +24,7 @@ final class Multiselect extends Select
 
     public function selectedOptions(): Nodes
     {
-        return $this->descendants('option[selected]');
+        return $this->availableOptions()->reduce(static fn(Node $option) => $option->ensure(Option::class)->isSelected());
     }
 
     /**
