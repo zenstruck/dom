@@ -296,12 +296,16 @@ final class Selector implements \Stringable
 
     private static function xpathEquals(string $element, string $value, ?string $attribute = null): string
     {
-        return \sprintf('descendant-or-self::%s[%s = %s]', $element, self::xpathNormalize($attribute), self::xpathQuote(\mb_strtolower($value)));
+        $value = \mb_strtolower($value);
+
+        return \sprintf('descendant-or-self::%s[%s = %s]', $element, self::xpathNormalize($attribute, $value), self::xpathQuote($value));
     }
 
     private static function xpathContains(string $element, string $value, ?string $attribute = null): string
     {
-        return \sprintf('descendant-or-self::%s[contains(%s, %s)]', $element, self::xpathNormalize($attribute), self::xpathQuote(\mb_strtolower($value)));
+        $value = \mb_strtolower($value);
+
+        return \sprintf('descendant-or-self::%s[contains(%s, %s)]', $element, self::xpathNormalize($attribute, $value), self::xpathQuote($value));
     }
 
     private static function xpathQuote(string $value): string
@@ -330,15 +334,38 @@ final class Selector implements \Stringable
     }
 
     /**
-     * XPath 1.0 only supports ASCII case folding via translate(). Non-ASCII characters
-     * (accented letters, non-Latin scripts) will not be case-normalized. This is an inherent
-     * limitation of XPath 1.0 and cannot be fully resolved without post-filtering in PHP.
+     * XPath 1.0 can only case-fold through translate(), so the table holds the uppercase forms of the
+     * (lowercased) needle's characters, in any script: any other uppercase character could never
+     * match the needle anyway.
      */
-    private static function xpathNormalize(?string $attribute): string
+    private static function xpathNormalize(?string $attribute, string $needle): string
     {
-        return \sprintf(
-            'translate(normalize-space(%s), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")',
-            $attribute ? '@'.\ltrim($attribute, '@') : '.',
-        );
+        $subject = \sprintf('normalize-space(%s)', $attribute ? '@'.\ltrim($attribute, '@') : '.');
+        $upper = $lower = '';
+
+        foreach (\array_unique(\mb_str_split($needle)) as $char) {
+            $variants = self::uppercaseVariants($char);
+            $upper .= \implode('', $variants);
+            $lower .= \str_repeat($char, \count($variants));
+        }
+
+        if ('' === $upper) {
+            return $subject;
+        }
+
+        return \sprintf('translate(%s, %s, %s)', $subject, self::xpathQuote($upper), self::xpathQuote($lower));
+    }
+
+    /**
+     * Upper and title case differ for digraphs (eg "ǆ" has "Ǆ" and "ǅ"). translate() maps single
+     * characters, so a multi-character form (eg "ß" to "SS") cannot be folded.
+     *
+     * @return list<string>
+     */
+    private static function uppercaseVariants(string $char): array
+    {
+        $variants = \array_unique([\mb_strtoupper($char), \mb_convert_case($char, \MB_CASE_TITLE)]);
+
+        return \array_values(\array_filter($variants, static fn(string $variant) => $variant !== $char && 1 === \mb_strlen($variant)));
     }
 }

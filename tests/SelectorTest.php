@@ -12,6 +12,7 @@
 namespace Zenstruck\Dom\Tests;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\CssSelector\Exception\ParseException;
@@ -647,6 +648,45 @@ final class SelectorTest extends TestCase
         $dom = new Dom('<label for="widget">Email</label><div id="widget"></div><label>Email <input name="email"></label>');
 
         $this->assertSame('email', $dom->find(Selector::fieldForLabel('Email'))?->attr('name'));
+    }
+
+    #[Test]
+    #[DataProvider('nonAsciiLabels')]
+    public function field_for_label_folds_case_beyond_ascii(string $label, string $search): void
+    {
+        $dom = new Dom(\sprintf('<label for="f">%s</label><input id="f" name="f">', $label));
+
+        $this->assertNotNull($dom->find(Selector::fieldForLabel($search)));
+    }
+
+    public static function nonAsciiLabels(): iterable
+    {
+        yield 'exact' => ['Émail', 'Émail'];
+        yield 'lowercase search' => ['Émail', 'émail'];
+        yield 'uppercase search' => ['émail', 'ÉMAIL'];
+        yield 'partial' => ['Adresse Électronique', 'électronique'];
+        yield 'cyrillic' => ['Имя', 'имя'];
+        yield 'greek' => ['ΌΝΟΜΑ', 'όνομα'];
+        yield 'title case digraph' => ['ǅungla', 'ǆungla'];
+        yield 'quotes' => ['Say "Hi"', 'SAY "HI"'];
+        yield 'uncased' => ['123', '123'];
+    }
+
+    #[Test]
+    public function link_folds_case_beyond_ascii(): void
+    {
+        $dom = new Dom('<a href="/a">Über uns</a><a href="/b" title="Ärger melden">report</a>');
+
+        $this->assertSame('/a', $dom->find(Selector::link('ÜBER'))?->attr('href'));
+        $this->assertSame('/b', $dom->find(Selector::link('ärger'))?->attr('href'));
+    }
+
+    #[Test]
+    public function uppercase_text_outside_the_search_still_does_not_match(): void
+    {
+        $dom = new Dom('<label for="f">ÉMAIL</label><input id="f" name="f">');
+
+        $this->assertNull($dom->find(Selector::fieldForLabel('email')));
     }
 
     private function createCrawler(): Crawler
