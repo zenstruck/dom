@@ -68,11 +68,6 @@ final class RadioTest extends TestCase
         $this->assertNull($radio->selectedValue());
     }
 
-    private function dom(?TestSession $session = null): Dom
-    {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
-    }
-
     #[Test]
     public function is_selected_defers_to_the_session(): void
     {
@@ -80,5 +75,10 @@ final class RadioTest extends TestCase
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
         $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
+    }
+
+    private function dom(?TestSession $session = null): Dom
+    {
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);
     }
 }

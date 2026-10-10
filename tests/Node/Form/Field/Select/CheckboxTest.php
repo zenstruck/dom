@@ -45,11 +45,6 @@ final class CheckboxTest extends TestCase
         $this->assertNull($unchecked->value());
     }
 
-    private function dom(?TestSession $session = null): Dom
-    {
-        return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
-    }
-
     #[Test]
     public function is_checked_defers_to_the_session(): void
     {
@@ -57,5 +52,10 @@ final class CheckboxTest extends TestCase
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
         $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
+    }
+
+    private function dom(?TestSession $session = null): Dom
+    {
+        return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
     }
 }
