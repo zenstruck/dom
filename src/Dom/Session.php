@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom;
 
+use Zenstruck\Dom\Node\Form\Field;
 use Zenstruck\Dom\Node\Form\Field\Checkbox;
 use Zenstruck\Dom\Node\Form\Field\File;
 use Zenstruck\Dom\Node\Form\Field\Input;
@@ -36,4 +37,15 @@ interface Session
     public function attach(File $node, array $filenames): void;
 
     public function fill(Input|Textarea $node, string $value): void;
+
+    /**
+     * The field's current value. Typing changes a DOM property, which the markup never carries,
+     * so {@see Field::value()} cannot answer this once {@see self::fill()} has been called.
+     */
+    public function value(Input|Textarea $node): ?string;
+
+    /**
+     * Whether the choice is currently on, for the same reason {@see self::value()} exists.
+     */
+    public function isSelected(Checkbox|Radio|Option $node): bool;
 }

@@ -27,7 +27,7 @@ final class Input extends Field
 
     public function value(): ?string
     {
-        return parent::value();
+        return $this->session?->value($this) ?? parent::value();
     }
 
     public function fill(string $value): void

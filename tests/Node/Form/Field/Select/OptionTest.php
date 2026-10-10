@@ -69,4 +69,13 @@ final class OptionTest extends TestCase
         $this->assertCount(1, $session->selected);
         $this->assertSame('option 2', $session->selected[0]->value());
     }
+
+    #[Test]
+    public function is_selected_defers_to_the_session(): void
+    {
+        $markup = '<form><select name="s"><option value="a">A</option></select></form>';
+
+        $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
+        $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
+    }
 }

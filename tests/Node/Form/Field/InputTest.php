@@ -43,6 +43,16 @@ final class InputTest extends TestCase
         $this->assertSame('updated', $session->fills[0][1]);
     }
 
+    #[Test]
+    public function value_defers_to_the_session(): void
+    {
+        $markup = $this->dom()->findOrFail(Selector::css('#input1'))->ensure(Input::class);
+        $live = $this->dom(new TestSession('typed'))->findOrFail(Selector::css('#input1'))->ensure(Input::class);
+
+        $this->assertNotSame('typed', $markup->value());
+        $this->assertSame('typed', $live->value());
+    }
+
     private function dom(?TestSession $session = null): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'), $session);

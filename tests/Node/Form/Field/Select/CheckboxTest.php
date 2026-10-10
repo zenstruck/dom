@@ -49,4 +49,13 @@ final class CheckboxTest extends TestCase
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'), $session);
     }
+
+    #[Test]
+    public function is_checked_defers_to_the_session(): void
+    {
+        $markup = '<form><input type="checkbox" name="agree"></form>';
+
+        $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
+        $this->assertTrue((new Dom($markup, new TestSession(selectedState: true)))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
+    }
 }
