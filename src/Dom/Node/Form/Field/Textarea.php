@@ -22,6 +22,7 @@ final class Textarea extends Field
 
     public function value(): string
     {
-        return $this->inspector?->value($this) ?? $this->directText();
+        // the parser drops a single leading newline, the rest is the value verbatim
+        return $this->inspector?->value($this) ?? (string) \preg_replace('/^\r?\n/', '', $this->element()->textContent);
     }
 }

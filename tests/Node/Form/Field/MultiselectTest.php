@@ -55,6 +55,15 @@ final class MultiselectTest extends TestCase
         $this->assertSame(['option 1', 'option 2', 'option 3'], $all->selectedValues());
     }
 
+    #[Test]
+    public function selected_values_keep_zero(): void
+    {
+        $dom = new Dom('<select id="s" multiple><option value="0" selected>Zero</option><option value="1" selected>One</option></select>');
+        $multi = $dom->findOrFail(Selector::css('#s'))->ensure(Multiselect::class);
+
+        $this->assertSame(['0', '1'], $multi->selectedValues());
+    }
+
     private function dom(): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));

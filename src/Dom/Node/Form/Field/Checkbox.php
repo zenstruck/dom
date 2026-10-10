@@ -26,10 +26,10 @@ final class Checkbox extends Field
     }
 
     /**
-     * @return "on"|null
+     * The value submitted when checked, null when not.
      */
     public function value(): ?string
     {
-        return $this->isChecked() ? 'on' : null;
+        return $this->isChecked() ? $this->attributes()->get('value') ?? 'on' : null;
     }
 }

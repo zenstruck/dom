@@ -32,7 +32,7 @@ final class Multiselect extends Select
      */
     public function selectedValues(): array
     {
-        return \array_filter($this->selectedOptions()->map(static fn(Option $option) => $option->value()));
+        return \array_values(\array_filter($this->selectedOptions()->map(static fn(Option $option) => $option->value()), static fn(string $value) => '' !== $value));
     }
 
     /**
@@ -40,7 +40,7 @@ final class Multiselect extends Select
      */
     public function selectedTexts(): array
     {
-        return \array_filter($this->selectedOptions()->map(static fn(Option $option) => $option->text()));
+        return \array_values(\array_filter($this->selectedOptions()->map(static fn(Option $option) => $option->text()), static fn(string $text) => '' !== $text));
     }
 
     /**

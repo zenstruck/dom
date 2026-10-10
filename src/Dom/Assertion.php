@@ -36,14 +36,14 @@ final class Assertion
 
     public function contains(string $expected): static
     {
-        Assert::that($this->dom->crawler()->text())->contains($expected, strict: false);
+        Assert::that($this->pageText())->contains($expected, strict: false);
 
         return $this;
     }
 
     public function doesNotContain(string $expected): static
     {
-        Assert::that($this->dom->crawler()->text())->doesNotContain($expected, strict: false);
+        Assert::that($this->pageText())->doesNotContain($expected, strict: false);
 
         return $this;
     }
@@ -221,7 +221,7 @@ final class Assertion
      */
     public function fieldEquals(Selector|string|callable $selector, string $expected): static
     {
-        $field = $this->field($selector);
+        $field = $this->scalarField($selector);
 
         if ($expected === (string) $field->value()) {
             Assert::pass();
@@ -245,9 +245,17 @@ final class Assertion
      */
     public function fieldDoesNotEqual(Selector|string|callable $selector, string $expected): static
     {
-        Assert::that($this->field($selector)->value())
+        $field = $this->scalarField($selector);
+
+        Assert::that($field->value())
             ->isNotEqualTo($expected, 'Field with selector "{selector}" equals "{expected}" but it should not.', ['selector' => $selector])
         ;
+
+        if ($field instanceof Combobox) {
+            Assert::that($field->selectedText())
+                ->isNotEqualTo($expected, 'Combobox with selector "{selector}" equals "{expected}" but it should not.', ['selector' => $selector])
+            ;
+        }
 
         return $this;
     }
@@ -309,8 +317,8 @@ final class Assertion
 
         switch ($field::class) {
             case Radio::class:
-                Assert::that($field->isSelected())
-                    ->is(false, 'Radio with selector "{selector}" is selected but it should not be.', ['selector' => $selector])
+                Assert::that($field->selectedValue())
+                    ->isNot($expected, 'Radio with selector "{selector}" has "{expected}" selected but it should not.', ['selector' => $selector])
                 ;
 
                 break;
@@ -324,6 +332,10 @@ final class Assertion
 
             case Combobox::class:
                 Assert::that($field->selectedValue())
+                    ->isNot($expected, 'Combobox with selector "{selector}" has "{expected}" selected but it should not.', ['selector' => $selector])
+                ;
+
+                Assert::that($field->selectedText())
                     ->isNot($expected, 'Combobox with selector "{selector}" has "{expected}" selected but it should not.', ['selector' => $selector])
                 ;
 
@@ -463,5 +475,24 @@ final class Assertion
     private function field(Selector|string|callable $selector): Field
     {
         return $this->node(Selector::field($selector), Field::class);
+    }
+
+    /**
+     * @param SelectorType $selector
+     */
+    private function scalarField(Selector|string|callable $selector): Field
+    {
+        $field = $this->field($selector);
+
+        if ($field instanceof Multiselect) {
+            Assert::fail('Field with selector "{selector}" is a multiselect, use fieldSelected() instead.', ['selector' => $selector]);
+        }
+
+        return $field;
+    }
+
+    private function pageText(): string
+    {
+        return $this->dom->find(Selector::css(':root'))?->text() ?? '';
     }
 }

@@ -60,7 +60,7 @@ final class OptionTest extends TestCase
     #[Test]
     public function is_selected_defers_to_the_inspector(): void
     {
-        $markup = '<form><select name="s"><option value="a">A</option></select></form>';
+        $markup = '<form><select name="s" multiple><option value="a">A</option></select></form>';
 
         $this->assertFalse((new Dom($markup))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());
         $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('option'))->ensure(Option::class)->isSelected());

@@ -40,7 +40,7 @@ abstract class Select extends Field
      */
     final public function availableValues(): array
     {
-        return \array_filter($this->availableOptions()->map(static fn(Option $option) => $option->value()));
+        return \array_values(\array_filter($this->availableOptions()->map(static fn(Option $option) => $option->value()), static fn(string $value) => '' !== $value));
     }
 
     final public function isMultiple(): bool
@@ -53,7 +53,7 @@ abstract class Select extends Field
         foreach ($this->availableOptions() as $option) {
             $option = $option->ensure(Option::class);
 
-            if ($value === \mb_strtolower($option->value()) || \mb_strtolower($value) === $option->text()) {
+            if ($value === \mb_strtolower($option->value()) || $value === \mb_strtolower($option->text())) {
                 return $option;
             }
         }

@@ -20,7 +20,7 @@ final class Button extends Field
 
     public function type(): string
     {
-        return $this->attributes()->get('type') ?? 'button';
+        return \mb_strtolower($this->attributes()->get('type') ?? 'submit');
     }
 
     public function value(): string

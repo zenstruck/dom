@@ -11,6 +11,7 @@
 
 namespace Zenstruck\Dom\Tests;
 
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -226,6 +227,40 @@ final class AssertionTest extends TestCase
             ->hasElementCount('li', 3)
             ->elementIsVisible('ul')
         ;
+    }
+
+    #[Test]
+    public function contains_ignores_scripts(): void
+    {
+        (new Assertion('<html><body><p>visible</p><script>var secret;</script></body></html>'))
+            ->contains('visible')
+            ->doesNotContain('secret')
+        ;
+    }
+
+    #[Test]
+    public function field_not_selected_for_radio_checks_the_expected_value(): void
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->assertion()->fieldNotSelected('input_8', 'option 2');
+    }
+
+    #[Test]
+    public function field_does_not_equal_checks_combobox_text(): void
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        (new Assertion('<form><select name="s"><option value="1">Bar Baz</option></select></form>'))->fieldDoesNotEqual('s', 'Bar Baz');
+    }
+
+    #[Test]
+    public function field_equals_rejects_a_multiselect(): void
+    {
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('use fieldSelected()');
+
+        $this->assertion()->fieldEquals('#input7', 'option 1');
     }
 
     private function assertion(): Assertion

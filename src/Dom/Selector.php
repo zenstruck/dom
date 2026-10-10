@@ -69,6 +69,10 @@ final class Selector implements \Stringable
             return self::TYPE_CALLBACK;
         }
 
+        if (self::TYPE_AUTO === $this->type) {
+            return $this->value;
+        }
+
         return \sprintf(self::SEPARATOR_FORMAT, $this->type, $this->value);
     }
 
@@ -171,10 +175,10 @@ final class Selector implements \Stringable
     /**
      * @internal Do not use outside of zenstruck/dom. Subject to removal or signature changes without notice.
      */
-    public function filter(Crawler $crawler): Crawler
+    public function filter(Crawler $crawler, ?Inspector $inspector = null): Crawler
     {
         if ($this->value instanceof \Closure) {
-            $return = ($this->value)(new Dom($crawler));
+            $return = ($this->value)(new Dom($crawler, $inspector));
 
             return match (true) {
                 $return instanceof Crawler => $return,
@@ -184,9 +188,12 @@ final class Selector implements \Stringable
             };
         }
 
-        $types = self::PRIORITY_MAP[$this->type] ?? [$this->type];
+        if (!isset(self::PRIORITY_MAP[$this->type])) {
+            // an explicit type reports a malformed selector rather than "not found"
+            return self::filterByType($crawler, $this->type, $this->value);
+        }
 
-        foreach ($types as $type) {
+        foreach (self::PRIORITY_MAP[$this->type] as $type) {
             try {
                 $filtered = self::filterByType($crawler, $type, $this->value);
             } catch (\InvalidArgumentException|\Symfony\Component\CssSelector\Exception\ParseException) {
@@ -205,14 +212,14 @@ final class Selector implements \Stringable
     {
         return match ($type) {
             self::TYPE_CSS => $crawler->filter($value),
-            self::TYPE_ID => $crawler->filter(\sprintf('#%s', \ltrim($value, '#'))),
+            self::TYPE_ID => $crawler->filterXPath(\sprintf('descendant-or-self::*[@id = %s]', self::xpathQuote(\ltrim($value, '#')))),
             self::TYPE_LINK => self::filterLink($crawler, $value),
             self::TYPE_BUTTON => $crawler->selectButton($value),
             self::TYPE_IMAGE => $crawler->selectImage($value),
-            self::TYPE_FIELD_FOR_NAME => $crawler->filter(\sprintf('input[name="%1$s"],select[name="%1$s"],textarea[name="%1$s"]', $value)),
+            self::TYPE_FIELD_FOR_NAME => $crawler->filterXPath(\sprintf('descendant-or-self::*[(self::input or self::select or self::textarea) and @name = %s]', self::xpathQuote($value))),
             self::TYPE_FIELD_FOR_LABEL => self::filterFieldForLabel($crawler, $value),
             self::TYPE_XPATH => $crawler->filterXPath($value),
-            self::TYPE_TESTID => $crawler->filter(\sprintf('[data-testid="%s"]', $value)),
+            self::TYPE_TESTID => $crawler->filterXPath(\sprintf('descendant-or-self::*[@data-testid = %s]', self::xpathQuote($value))),
             default => throw new \InvalidArgumentException(\sprintf('Invalid type "%s".', $type)),
         };
     }
@@ -242,12 +249,20 @@ final class Selector implements \Stringable
             $label = self::filterByType($crawler, self::TYPE_XPATH, self::xpathContains('label', $value));
         }
 
-        if (!\count($label)) {
-            return new Crawler();
+        // the first label may not point at a field (eg a label for a custom widget)
+        foreach ($label as $element) {
+            if (\count($field = self::fieldForLabelElement($crawler, new Crawler($element, $crawler->getUri(), $crawler->getBaseHref())))) {
+                return $field;
+            }
         }
 
+        return new Crawler();
+    }
+
+    private static function fieldForLabelElement(Crawler $crawler, Crawler $label): Crawler
+    {
         if ($id = $label->attr('for')) {
-            return self::filterByType($crawler, self::TYPE_ID, $id);
+            return self::filterByType($crawler, self::TYPE_ID, $id)->filter('input,select,textarea');
         }
 
         // try and find field nested in label

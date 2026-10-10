@@ -20,6 +20,11 @@ final class Radio extends Field
 {
     public const SELECTOR = 'input[type="radio"]';
 
+    public function value(): string
+    {
+        return $this->attributes()->get('value') ?? 'on';
+    }
+
     public function isSelected(): bool
     {
         return $this->inspector?->isSelected($this) ?? $this->attributes()->has('checked');

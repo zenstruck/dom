@@ -41,6 +41,14 @@ final class CheckboxTest extends TestCase
         $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->isChecked());
     }
 
+    #[Test]
+    public function value_is_the_value_attribute_when_checked(): void
+    {
+        $dom = new Dom('<form><input type="checkbox" name="c" value="yes" checked></form>');
+
+        $this->assertSame('yes', $dom->findOrFail(Selector::css('input'))->ensure(Checkbox::class)->value());
+    }
+
     private function dom(): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));

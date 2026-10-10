@@ -68,7 +68,7 @@ final class FormTest extends TestCase
 
         foreach ($submitButtons as $button) {
             $button = $button->ensure(Button::class);
-            $this->assertSame('submit', $button->type());
+            $this->assertContains($button->type(), ['submit', 'image']);
         }
     }
 
@@ -437,6 +437,30 @@ final class FormTest extends TestCase
         $this->assertContains('btn2', $withIdButtonIds);
         $this->assertContains('btn3', $withIdButtonIds);
         $this->assertContains('btn4', $withIdButtonIds);
+    }
+
+    #[Test]
+    public function fields_exclude_the_form_itself(): void
+    {
+        $form = (new Dom('<form name="user"><input name="email"></form>'))->findOrFail(Selector::css('form'))->ensure(Form::class);
+
+        $this->assertSame(['input'], $form->fields()->map(static fn(Node $node) => $node->tag()));
+    }
+
+    #[Test]
+    public function fields_keep_document_order(): void
+    {
+        $form = (new Dom('<input name="a" form="f"><form id="f"><input name="b"></form><input name="c" form="f">'))->findOrFail(Selector::css('form'))->ensure(Form::class);
+
+        $this->assertSame(['a', 'b', 'c'], $form->fields()->map(static fn(Field $field) => $field->name()));
+    }
+
+    #[Test]
+    public function submit_buttons_include_untyped_buttons(): void
+    {
+        $form = (new Dom('<form><button type="button">No</button><button>Save</button></form>'))->findOrFail(Selector::css('form'))->ensure(Form::class);
+
+        $this->assertSame('Save', $form->submitButton()?->text());
     }
 
     private function dom(): Dom

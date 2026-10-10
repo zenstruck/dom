@@ -22,12 +22,12 @@ use Zenstruck\Dom\Selector;
 final class ButtonTest extends TestCase
 {
     #[Test]
-    public function type_defaults_to_button_when_missing(): void
+    public function type_defaults_to_submit_when_missing(): void
     {
         $dom = new Dom('<button>Click</button>');
         $button = $dom->findOrFail(Selector::css('button'))->ensure(Button::class);
 
-        $this->assertSame('button', $button->type());
+        $this->assertSame('submit', $button->type());
     }
 
     #[Test]

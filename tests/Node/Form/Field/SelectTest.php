@@ -60,4 +60,23 @@ final class SelectTest extends TestCase
         $this->assertFalse($single->isMultiple());
         $this->assertTrue($multi->isMultiple());
     }
+
+    #[Test]
+    public function option_matching_compares_text_case_insensitively(): void
+    {
+        $dom = new Dom('<select id="s"><option value="1">Bar Baz</option><option value="2">Bar</option></select>');
+        $select = $dom->findOrFail(Selector::css('#s'))->ensure(Combobox::class);
+
+        $this->assertSame('2', $select->optionMatching('Bar')?->value());
+        $this->assertSame('2', $select->optionMatching('BAR')?->value());
+    }
+
+    #[Test]
+    public function available_values_keep_zero(): void
+    {
+        $dom = new Dom('<select id="s" multiple><option value="">None</option><option value="0">Zero</option><option value="1">One</option></select>');
+        $select = $dom->findOrFail(Selector::css('#s'))->ensure(Multiselect::class);
+
+        $this->assertSame(['0', '1'], $select->availableValues());
+    }
 }

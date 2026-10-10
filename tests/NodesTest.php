@@ -355,6 +355,15 @@ PHP;
         $this->assertSame($crawler, $nodes->crawler());
     }
 
+    #[Test]
+    public function merge_keeps_the_uri(): void
+    {
+        $crawler = new Crawler('<a href="/one">1</a><a href="/two">2</a>', 'https://example.com/');
+        $nodes = Nodes::create($crawler->filter('a')->first(), null)->merge(Nodes::create($crawler->filter('a')->last(), null));
+
+        $this->assertSame('https://example.com/', $nodes->crawler()->getUri());
+    }
+
     private function fixtureHtml(): string
     {
         return \file_get_contents(__DIR__.'/Fixtures/page.html');

@@ -98,4 +98,21 @@ final class FieldTest extends TestCase
         $this->assertFalse($enabled->isDisabled());
         $this->assertTrue($disabled->isDisabled());
     }
+
+    #[Test]
+    public function disabled_by_fieldset_except_in_its_first_legend(): void
+    {
+        $dom = new Dom('<form><fieldset disabled><legend><input name="in_legend"></legend><input name="in_fieldset"></fieldset></form>');
+
+        $this->assertTrue($dom->findOrFail('in_fieldset')->ensure(Field::class)->isDisabled());
+        $this->assertFalse($dom->findOrFail('in_legend')->ensure(Field::class)->isDisabled());
+    }
+
+    #[Test]
+    public function label_outside_the_form(): void
+    {
+        $dom = new Dom('<label for="q">Search</label><form><input id="q" name="q"></form>');
+
+        $this->assertSame('Search', $dom->findOrFail('q')->ensure(Field::class)->label()?->text());
+    }
 }

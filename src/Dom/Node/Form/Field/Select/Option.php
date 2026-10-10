@@ -30,7 +30,7 @@ final class Option extends Field
 
     public function isSelected(): bool
     {
-        return $this->inspector?->isSelected($this) ?? $this->attributes()->has('selected');
+        return $this->inspector?->isSelected($this) ?? $this->isSelectedInMarkup();
     }
 
     public function collection(): Nodes
@@ -41,5 +41,25 @@ final class Option extends Field
     public function selector(): ?Select
     {
         return $this->closest('select')?->ensure(Select::class);
+    }
+
+    private function isSelectedInMarkup(): bool
+    {
+        $select = $this->selector();
+
+        if (!$select instanceof Combobox) {
+            return $this->attributes()->has('selected');
+        }
+
+        // a single select shows its last selected option, or its first enabled one when none is
+        $element = $select->element();
+        $xpath = $this->xpath();
+        $selected = ($xpath->query('(.//option[@selected])[last()]', $element) ?: null)?->item(0);
+
+        if (!$selected && (int) $select->attributes()->get('size') <= 1) {
+            $selected = ($xpath->query('(.//option[not(@disabled) and not(ancestor::optgroup[@disabled])])[1]', $element) ?: null)?->item(0);
+        }
+
+        return (bool) $selected?->isSameNode($this->element());
     }
 }

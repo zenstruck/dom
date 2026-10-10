@@ -58,7 +58,7 @@ final class Nodes implements \IteratorAggregate, \Countable
      */
     public function filter(Selector|string|callable $selector): self
     {
-        return self::create(Selector::wrap($selector)->filter($this->crawler), $this->inspector);
+        return self::create(Selector::wrap($selector)->filter($this->crawler, $this->inspector), $this->inspector);
     }
 
     public function merge(self $other): self
@@ -69,7 +69,7 @@ final class Nodes implements \IteratorAggregate, \Countable
             $nodes[] = $node;
         }
 
-        $crawler = new Crawler();
+        $crawler = new Crawler(null, $this->crawler->getUri(), $this->crawler->getBaseHref());
         $crawler->add($nodes);
 
         return new self($crawler, $this->inspector);

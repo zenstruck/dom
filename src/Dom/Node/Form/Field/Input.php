@@ -22,7 +22,7 @@ final class Input extends Field
 
     public function type(): string
     {
-        return $this->attributes()->get('type') ?? 'button';
+        return \mb_strtolower($this->attributes()->get('type') ?? 'text');
     }
 
     public function value(): ?string
