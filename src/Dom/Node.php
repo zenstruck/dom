@@ -238,9 +238,40 @@ class Node
         return $this->attributes()->hasClass($class);
     }
 
-    final public function click(): void
+    final public function click(Modifier|string ...$modifiers): void
     {
-        $this->ensureSession()->click($this);
+        if (!$modifiers) {
+            $this->ensureSession()->click($this);
+
+            return;
+        }
+
+        $this->ensureRenderedSession()->click($this, ...self::normalizeModifiers($modifiers));
+    }
+
+    final public function doubleClick(Modifier|string ...$modifiers): void
+    {
+        $this->ensureRenderedSession()->doubleClick($this, ...self::normalizeModifiers($modifiers));
+    }
+
+    final public function rightClick(Modifier|string ...$modifiers): void
+    {
+        $this->ensureRenderedSession()->rightClick($this, ...self::normalizeModifiers($modifiers));
+    }
+
+    final public function hover(Modifier|string ...$modifiers): void
+    {
+        $this->ensureRenderedSession()->hover($this, ...self::normalizeModifiers($modifiers));
+    }
+
+    final public function focus(): void
+    {
+        $this->ensureRenderedSession()->focus($this);
+    }
+
+    final public function blur(): void
+    {
+        $this->ensureRenderedSession()->blur($this);
     }
 
     /**
@@ -266,5 +297,24 @@ class Node
     final protected function ensureSession(): Session
     {
         return $this->session ?? throw new RuntimeException('No interactive session available.');
+    }
+
+    final protected function ensureRenderedSession(): RenderedSession
+    {
+        if ($this->session instanceof RenderedSession) {
+            return $this->session;
+        }
+
+        throw new RuntimeException('No rendered session available.');
+    }
+
+    /**
+     * @param array<Modifier|string> $modifiers
+     *
+     * @return list<Modifier>
+     */
+    private static function normalizeModifiers(array $modifiers): array
+    {
+        return \array_values(\array_map(Modifier::normalize(...), $modifiers));
     }
 }
