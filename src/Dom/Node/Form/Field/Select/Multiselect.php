@@ -11,9 +11,7 @@
 
 namespace Zenstruck\Dom\Node\Form\Field\Select;
 
-use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Node\Form\Field\Select;
-use Zenstruck\Dom\Nodes;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
@@ -21,11 +19,6 @@ use Zenstruck\Dom\Nodes;
 final class Multiselect extends Select
 {
     public const SELECTOR = 'select[multiple]';
-
-    public function selectedOptions(): Nodes
-    {
-        return $this->availableOptions()->reduce(static fn(Node $option) => $option->ensure(Option::class)->isSelected());
-    }
 
     /**
      * @return string[]
