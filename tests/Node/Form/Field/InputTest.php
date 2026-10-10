@@ -23,12 +23,12 @@ use Zenstruck\Dom\Tests\Support\TestInspector;
 final class InputTest extends TestCase
 {
     #[Test]
-    public function type_defaults_to_button(): void
+    public function type_defaults_to_text(): void
     {
         $dom = new Dom('<form><input name="no_type" value="v"></form>');
         $input = $dom->findOrFail(Selector::css('input'))->ensure(Input::class);
 
-        $this->assertSame('button', $input->type());
+        $this->assertSame('text', $input->type());
     }
 
     #[Test]

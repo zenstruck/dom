@@ -71,6 +71,14 @@ final class ElementTest extends TestCase
         $this->assertNull($field->form());
     }
 
+    #[Test]
+    public function form_attribute_pointing_nowhere_has_no_form(): void
+    {
+        $dom = new Dom('<form><input name="a" form="missing"></form>');
+
+        $this->assertNull($dom->findOrFail(Selector::css('input'))->ensure(Input::class)->form());
+    }
+
     private function dom(): Dom
     {
         return new Dom(\file_get_contents(__DIR__.'/../../Fixtures/form_attribute.html'));

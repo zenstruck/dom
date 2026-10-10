@@ -38,7 +38,7 @@ final class Form extends Node
 
     public function submitButtons(): Nodes
     {
-        return $this->findNodesForForm('input[type="submit"],button[type="submit"]');
+        return $this->findNodesForForm('input[type="submit"],input[type="image"],button[type="submit"],button:not([type])');
     }
 
     public function submitButton(): ?Button
@@ -56,19 +56,28 @@ final class Form extends Node
     {
         $formId = $this->id();
 
-        // Direct descendants without explicit form attribute pointing elsewhere
-        $directDescendants = $this->descendants($selector)
-            ->reduce(static fn(Node $node) => !$node->attributes()->has('form'));
-
         if (null === $formId || '' === $formId) {
-            return $directDescendants;
+            return $this->descendants($selector)->reduce(fn(Node $node) => $this->owns($node));
         }
 
-        // Find elements anywhere in document with form="{id}"
-        $referencingNodes = $this->root()
+        // one document-wide pass keeps document order, which positional lookups rely on
+        return $this->root()
             ->descendants($selector)
-            ->reduce(static fn(Node $node) => $node->attributes()->is('form', $formId));
+            ->reduce(fn(Node $node) => $node->attributes()->is('form', $formId) || $this->owns($node))
+        ;
+    }
 
-        return $directDescendants->merge($referencingNodes);
+    private function owns(Node $node): bool
+    {
+        if ($node->attributes()->has('form')) {
+            return false;
+        }
+
+        // css filtering matches descendant-or-self, which would count the form as its own field
+        if ($node->element()->isSameNode($this->element())) {
+            return false;
+        }
+
+        return (bool) $node->closest('form')?->element()->isSameNode($this->element());
     }
 }

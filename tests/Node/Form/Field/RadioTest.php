@@ -50,6 +50,24 @@ final class RadioTest extends TestCase
         $this->assertTrue((new Dom($markup, new TestInspector(selected: true)))->findOrFail(Selector::css('input'))->ensure(Radio::class)->isSelected());
     }
 
+    #[Test]
+    public function collection_includes_radios_associated_by_form_attribute(): void
+    {
+        $dom = new Dom('<input type="radio" name="g" value="before" form="f"><form id="f"><input type="radio" name="g" value="inside"></form><input type="radio" name="g" value="after" form="f">');
+        $radio = $dom->findOrFail(Selector::css('input[value="inside"]'))->ensure(Radio::class);
+
+        $this->assertSame(['before', 'inside', 'after'], $radio->collection()->map(static fn(Radio $radio) => $radio->value()));
+        $this->assertSame('after', $radio->withValue('after')?->value());
+    }
+
+    #[Test]
+    public function value_defaults_to_on(): void
+    {
+        $dom = new Dom('<form><input type="radio" name="g"></form>');
+
+        $this->assertSame('on', $dom->findOrFail(Selector::css('input'))->ensure(Radio::class)->value());
+    }
+
     private function dom(): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../Fixtures/page.html'));

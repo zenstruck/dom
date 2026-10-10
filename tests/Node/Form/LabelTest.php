@@ -55,4 +55,20 @@ final class LabelTest extends TestCase
 
         $this->assertNull($label->field());
     }
+
+    #[Test]
+    public function field_outside_a_form(): void
+    {
+        $dom = new Dom('<label for="q">Search</label><input id="q" name="q">');
+
+        $this->assertSame('q', $dom->findOrFail(Selector::css('label'))->ensure(Label::class)->field()?->name());
+    }
+
+    #[Test]
+    public function field_is_null_when_for_points_at_a_non_field(): void
+    {
+        $dom = new Dom('<label for="widget">Widget</label><div id="widget"></div>');
+
+        $this->assertNull($dom->findOrFail(Selector::css('label'))->ensure(Label::class)->field());
+    }
 }

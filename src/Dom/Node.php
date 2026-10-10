@@ -25,6 +25,8 @@ class Node
 {
     public const SELECTOR = '*';
 
+    private const UNRENDERED = ['head', 'script', 'style', 'template', 'noscript'];
+
     private Attributes $attributes;
 
     protected function __construct(protected readonly Crawler $crawler, protected readonly ?Inspector $inspector)
@@ -87,7 +89,9 @@ class Node
 
     final public function text(): string
     {
-        return $this->inspector?->text($this) ?? $this->crawler->text();
+        $text = $this->inspector?->text($this);
+
+        return null === $text ? $this->textInMarkup() : self::normalizeWhitespace($text);
     }
 
     final public function directText(): string
@@ -236,22 +240,83 @@ class Node
         exit(1);
     }
 
+    final protected function xpath(): \DOMXPath
+    {
+        return new \DOMXPath($this->element()->ownerDocument ?? throw new RuntimeException('Node is not attached to a document.'));
+    }
+
     private function isVisibleInMarkup(): bool
     {
-        if ($this->attributes()->has('hidden')) {
-            return false;
-        }
-
         if ($this->attributes()->is('type', 'hidden')) {
             return false;
         }
 
-        $style = $this->attributes()->get('style') ?? '';
-
-        if (\preg_match('/display\s*:\s*none/i', $style) || \preg_match('/visibility\s*:\s*hidden/i', $style)) {
-            return false;
+        for ($element = $this->element(); $element instanceof \DOMElement; $element = $element->parentNode) {
+            if (self::isHiddenInMarkup($element)) {
+                return false;
+            }
         }
 
         return true;
+    }
+
+    private static function isHiddenInMarkup(\DOMElement $element): bool
+    {
+        if ($element->hasAttribute('hidden')) {
+            return true;
+        }
+
+        if (\in_array(\mb_strtolower($element->nodeName), self::UNRENDERED, true)) {
+            return true;
+        }
+
+        return (bool) \preg_match('/display\s*:\s*none|visibility\s*:\s*hidden/i', $element->getAttribute('style'));
+    }
+
+    /**
+     * The node's own text is kept (a <title> or <script> is asked about directly), only nested
+     * content a browser would not render is dropped.
+     */
+    private function textInMarkup(): string
+    {
+        $element = $this->element();
+        $xpath = $this->xpath();
+        $query = \implode('|', [...\array_map(static fn(string $tag) => './/'.$tag, self::UNRENDERED), './/*[@hidden]', './/*[@style]']);
+
+        if (!self::hasHiddenDescendant($xpath->query($query, $element) ?: [])) {
+            return $this->crawler->text();
+        }
+
+        $clone = $element->cloneNode(true);
+
+        foreach (\iterator_to_array($xpath->query($query, $clone) ?: []) as $descendant) {
+            if ($descendant instanceof \DOMElement && self::isHiddenInMarkup($descendant)) {
+                $descendant->parentNode?->removeChild($descendant);
+            }
+        }
+
+        return self::normalizeWhitespace($clone->textContent);
+    }
+
+    /**
+     * @param iterable<\DOMNode> $candidates
+     */
+    private static function hasHiddenDescendant(iterable $candidates): bool
+    {
+        foreach ($candidates as $candidate) {
+            if ($candidate instanceof \DOMElement && self::isHiddenInMarkup($candidate)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Mirrors {@see Crawler::text()}.
+     */
+    private static function normalizeWhitespace(string $text): string
+    {
+        return \trim((string) \preg_replace('/(?:\s{2,}+|[^\S ])/', ' ', $text));
     }
 }

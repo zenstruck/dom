@@ -39,4 +39,12 @@ final class TextareaTest extends TestCase
         $this->assertSame('Initial', (new Dom($markup))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
         $this->assertSame('typed', (new Dom($markup, new TestInspector('typed')))->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
     }
+
+    #[Test]
+    public function value_preserves_whitespace(): void
+    {
+        $dom = new Dom("<form><textarea name=\"t\">\nline 1\n  line 2</textarea></form>");
+
+        $this->assertSame("line 1\n  line 2", $dom->findOrFail(Selector::css('textarea'))->ensure(Textarea::class)->value());
+    }
 }

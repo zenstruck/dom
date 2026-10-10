@@ -14,9 +14,12 @@ namespace Zenstruck\Dom\Tests;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\CssSelector\Exception\ParseException;
 use Symfony\Component\DomCrawler\Crawler;
 use Zenstruck\Dom;
+use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Selector;
+use Zenstruck\Dom\Tests\Support\TestInspector;
 
 /**
  * @author Simon Andre <smmusic@music.fr>
@@ -142,7 +145,7 @@ final class SelectorTest extends TestCase
     #[Test]
     public function to_string_produces_type_separator_value_format(): void
     {
-        $this->assertSame('auto:==:div', (string) Selector::wrap('div'));
+        $this->assertSame('div', (string) Selector::wrap('div'));
         $this->assertSame('css:==:.foo', (string) Selector::css('.foo'));
         $this->assertSame('id:==:link', (string) Selector::id('link'));
         $this->assertSame('xpath:==://div', (string) Selector::xpath('//div'));
@@ -202,7 +205,7 @@ final class SelectorTest extends TestCase
         // 'invalid' is not a valid type, so it should fall back to 'auto'
         $selector = Selector::wrap('invalid:==:.foo');
 
-        $this->assertSame('auto:==:.foo', (string) $selector);
+        $this->assertSame('.foo', (string) $selector);
     }
 
     #[Test]
@@ -610,6 +613,40 @@ final class SelectorTest extends TestCase
         $result = $selector->filter($crawler);
 
         $this->assertCount(1, $result);
+    }
+
+    #[Test]
+    public function callback_receives_the_inspector(): void
+    {
+        $dom = new Dom('<ul><li>a</li></ul>', new TestInspector(visible: false));
+
+        $this->assertNull($dom->find(static fn(Dom $dom) => $dom->findAll('li')->reduce(static fn(Node $node) => $node->isVisible())));
+    }
+
+    #[Test]
+    public function explicit_type_reports_a_malformed_selector(): void
+    {
+        $this->expectException(ParseException::class);
+
+        (new Dom('<div></div>'))->find(Selector::css('div['));
+    }
+
+    #[Test]
+    public function values_are_quoted_rather_than_interpolated(): void
+    {
+        $dom = new Dom('<form><input id="a.b" name=\'say "hi"\' data-testid=\'x"y\'></form>');
+
+        $this->assertNotNull($dom->find(Selector::id('a.b')));
+        $this->assertNotNull($dom->find(Selector::fieldForName('say "hi"')));
+        $this->assertNotNull($dom->find(Selector::testId('x"y')));
+    }
+
+    #[Test]
+    public function field_for_label_skips_labels_without_a_field(): void
+    {
+        $dom = new Dom('<label for="widget">Email</label><div id="widget"></div><label>Email <input name="email"></label>');
+
+        $this->assertSame('email', $dom->find(Selector::fieldForLabel('Email'))?->attr('name'));
     }
 
     private function createCrawler(): Crawler

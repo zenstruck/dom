@@ -35,12 +35,12 @@ final class Combobox extends Select
 
     public function selectedValue(): ?string
     {
-        return $this->selectedOption()?->value() ?? $this->availableOptions()->first()?->ensure(Option::class)->value() ?? null;
+        return $this->selectedOption()?->value();
     }
 
     public function selectedText(): ?string
     {
-        return $this->selectedOption()?->text() ?? $this->availableOptions()->first()?->text() ?? null;
+        return $this->selectedOption()?->text();
     }
 
     public function value(): ?string

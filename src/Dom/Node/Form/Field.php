@@ -12,6 +12,7 @@
 namespace Zenstruck\Dom\Node\Form;
 
 use Symfony\Component\DomCrawler\Crawler;
+use Zenstruck\Dom\Node;
 use Zenstruck\Dom\Nodes;
 use Zenstruck\Dom\Selector;
 
@@ -26,7 +27,7 @@ abstract class Field extends Element
     {
         $id = $this->attributes()->get('id');
 
-        if ($id && $label = $this->form()?->descendant(Selector::css(\sprintf('label[for="%s"]', $id)))) {
+        if (null !== $id && '' !== $id && $label = $this->root()->descendants('label')->reduce(static fn(Node $label) => $id === $label->attr('for'))->first()) {
             return $label->ensure(Label::class);
         }
 
@@ -45,12 +46,23 @@ abstract class Field extends Element
             return Nodes::create(new Crawler(), $this->inspector);
         }
 
-        return $this->form()?->descendants(Selector::field($name)) ?? Nodes::create(new Crawler(), $this->inspector);
+        return $this->form()?->fields(Selector::fieldForName($name)) ?? Nodes::create(new Crawler(), $this->inspector);
     }
 
     final public function isDisabled(): bool
     {
-        return $this->attributes()->has('disabled');
+        if ($this->attributes()->has('disabled') || $this->closest('optgroup[disabled]')) {
+            return true;
+        }
+
+        if (!$fieldset = $this->closest('fieldset[disabled]')) {
+            return false;
+        }
+
+        // the fieldset's first legend stays enabled
+        $legend = $fieldset->crawler()->children('legend')->getNode(0);
+
+        return !$legend || !$this->closest('legend')?->element()->isSameNode($legend);
     }
 
     final public function isRequired(): bool

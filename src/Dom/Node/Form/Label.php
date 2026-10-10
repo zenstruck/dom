@@ -20,11 +20,11 @@ final class Label extends Element
 {
     public function field(): ?Field
     {
-        if ($for = $this->attributes()->get('for')) {
-            return $this->form()?->descendants(Selector::id($for))->first()?->ensure(Field::class);
-        }
+        $field = ($for = $this->attributes()->get('for'))
+            ? $this->root()->descendant(Selector::id($for))
+            : $this->descendant(Selector::css('input,select,textarea'))
+        ;
 
-        // check if wrapping field
-        return $this->descendants(Selector::css(Field::SELECTOR))->first()?->ensure(Field::class);
+        return $field instanceof Field ? $field : null;
     }
 }

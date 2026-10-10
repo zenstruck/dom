@@ -37,6 +37,30 @@ final class ComboboxTest extends TestCase
         $this->assertSame('Some value', $fallback->selectedText());
     }
 
+    #[Test]
+    public function last_selected_option_wins(): void
+    {
+        $dom = new Dom('<select id="s"><option value="a" selected>A</option><option value="b" selected>B</option></select>');
+
+        $this->assertSame('b', $dom->findOrFail(Selector::css('#s'))->ensure(Combobox::class)->selectedValue());
+    }
+
+    #[Test]
+    public function first_enabled_option_is_selected_by_default(): void
+    {
+        $dom = new Dom('<select id="s"><option value="a" disabled>A</option><optgroup disabled><option value="b">B</option></optgroup><option value="c">C</option></select>');
+
+        $this->assertSame('c', $dom->findOrFail(Selector::css('#s'))->ensure(Combobox::class)->selectedValue());
+    }
+
+    #[Test]
+    public function listbox_has_no_default_selection(): void
+    {
+        $dom = new Dom('<select id="s" size="3"><option value="a">A</option></select>');
+
+        $this->assertNull($dom->findOrFail(Selector::css('#s'))->ensure(Combobox::class)->selectedValue());
+    }
+
     private function dom(): Dom
     {
         return new Dom((string) \file_get_contents(__DIR__.'/../../../../Fixtures/page.html'));

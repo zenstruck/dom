@@ -29,6 +29,7 @@ use Zenstruck\Dom\Node\Form\Field\Select\Multiselect;
 use Zenstruck\Dom\Node\Form\Field\Select\Option;
 use Zenstruck\Dom\Node\Form\Field\Textarea;
 use Zenstruck\Dom\Node\Form\Label;
+use Zenstruck\Dom\Selector;
 use Zenstruck\Dom\Tests\Support\TestInspector;
 
 #[CoversClass(Node::class)]
@@ -619,6 +620,33 @@ final class NodeTest extends TestCase
         $this->assertNotNull($div5);
 
         $this->assertNull($div5->descendant('table'));
+    }
+
+    #[Test]
+    public function inspector_text_is_whitespace_normalized(): void
+    {
+        $dom = new Dom('<p>x</p>', new TestInspector(text: "  Foo\n\tBar  "));
+
+        $this->assertSame('Foo Bar', $dom->findOrFail(Selector::css('p'))->text());
+    }
+
+    #[Test]
+    public function markup_text_skips_content_a_browser_does_not_render(): void
+    {
+        $dom = new Dom('<html><head><title>Title</title></head><body><p>a <script>var s;</script><span hidden>h</span><i style="display: none">n</i>b</p></body></html>');
+
+        $this->assertSame('a b', $dom->findOrFail(Selector::css('p'))->text());
+        $this->assertSame('a b', $dom->findOrFail(Selector::css(':root'))->text());
+        $this->assertSame('Title', $dom->findOrFail(Selector::css('title'))->text());
+    }
+
+    #[Test]
+    public function hidden_ancestor_hides_the_node_in_markup(): void
+    {
+        $dom = new Dom('<html><head><title>T</title></head><body><div style="display:none"><a href="/">x</a></div></body></html>');
+
+        $this->assertFalse($dom->findOrFail(Selector::css('a'))->isVisible());
+        $this->assertFalse($dom->findOrFail(Selector::css('title'))->isVisible());
     }
 
     private function fixtureHtml(): string

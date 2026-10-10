@@ -30,12 +30,11 @@ abstract class Element extends Node
     {
         $formId = $this->attributes()->get('form');
 
+        // an element pointing at a missing form has no owner, it does not fall back to its ancestor
         if (\is_string($formId) && '' !== $formId) {
             $form = $this->root()->descendant(Selector::id($formId));
 
-            if ($form instanceof Form) {
-                return $form;
-            }
+            return $form instanceof Form ? $form : null;
         }
 
         return $this->closest('form')?->ensure(Form::class);
