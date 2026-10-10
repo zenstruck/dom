@@ -87,6 +87,7 @@ $dom->find(Selector::id('main-content'));
 $dom->find(Selector::button('Submit'));
 $dom->find(Selector::link('Click here'));
 $dom->find(Selector::image('Logo'));
+$dom->find(Selector::testId('checkout'));          // by data-testid attribute
 $dom->find(Selector::field('email'));              // by name or label
 $dom->find(Selector::fieldForName('email'));       // by name only
 $dom->find(Selector::fieldForLabel('Email'));      // by label only
@@ -99,6 +100,7 @@ $dom->find('id:==:main-content');
 $dom->find('button:==:Submit');
 $dom->find('link:==:Click here');
 $dom->find('field:==:email');
+$dom->find('testid:==:checkout');
 
 // CALLBACK SELECTORS
 $dom->find(function (Dom $dom): ?Node {
